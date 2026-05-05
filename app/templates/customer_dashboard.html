@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="logo">🏪 Smart Retail — My Account</div>
+    <div class="user-info">
+        <span id="custName"></span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value" id="statTotalBills">0</div><div class="stat-label">Total Bills</div></div>
+        <div class="stat-card"><div class="stat-value" id="statCreditTotal">₹0</div><div class="stat-label">Credit Total</div></div>
+        <div class="stat-card"><div class="stat-value" id="statPaidTotal">₹0</div><div class="stat-label">Paid Total</div></div>
+        <div class="stat-card"><div class="stat-value text-danger" id="statDue">₹0</div><div class="stat-label">Amount Due</div></div>
+    </div>
+
+    <!-- Bills -->
+    <div class="card">
+        <h2>🧾 My Bills</h2>
+        <table>
+            <thead><tr><th>Bill #</th><th>Type</th><th>Items</th><th>Total (₹)</th><th>Status</th><th>Date</th></tr></thead>
+            <tbody id="myBillsTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Payments -->
+    <div class="card">
+        <h2>💳 My Payments</h2>
+        <table>
+            <thead><tr><th>ID</th><th>Amount (₹)</th><th>Mode</th><th>Note</th><th>Date</th></tr></thead>
+            <tbody id="myPaymentsTable"></tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    window.addEventListener('DOMContentLoaded', async () => {
+        const data = await api('/api/customer/dashboard');
+        if (!data) return;
+
+        document.getElementById('custName').textContent = `Hello, ${data.customer.name}`;
+        document.getElementById('statTotalBills').textContent = data.total_bills;
+        document.getElementById('statCreditTotal').textContent = `₹${data.credit_total.toFixed(2)}`;
+        document.getElementById('statPaidTotal').textContent = `₹${data.paid_total.toFixed(2)}`;
+        document.getElementById('statDue').textContent = `₹${data.total_due.toFixed(2)}`;
+
+        // Bills
+        document.getElementById('myBillsTable').innerHTML = data.bills.map(b => `
+            <tr>
+                <td>#${b.id}</td>
+                <td>${b.bill_type === 'credit'
+                    ? '<span class="badge badge-warning">Credit</span>'
+                    : '<span class="badge badge-primary">Instant</span>'}</td>
+                <td>${b.items.map(i => `${i.product_name} ×${i.quantity}`).join(', ')}</td>
+                <td><strong>₹${b.total_amount.toFixed(2)}</strong></td>
+                <td>${b.is_paid
+                    ? '<span class="badge badge-success">Paid</span>'
+                    : '<span class="badge badge-danger">Unpaid</span>'}</td>
+                <td class="text-dim">${new Date(b.created_at).toLocaleDateString('en-IN')}</td>
+            </tr>
+        `).join('');
+
+        // Payments
+        document.getElementById('myPaymentsTable').innerHTML = data.payments.map(p => `
+            <tr>
+                <td>#${p.id}</td>
+                <td><strong>₹${p.amount.toFixed(2)}</strong></td>
+                <td><span class="badge badge-primary">${p.payment_mode.toUpperCase()}</span></td>
+                <td class="text-dim">${p.note || '—'}</td>
+                <td class="text-dim">${new Date(p.created_at).toLocaleDateString('en-IN')}</td>
+            </tr>
+        `).join('');
+    });
+</script>
+{% endblock %}

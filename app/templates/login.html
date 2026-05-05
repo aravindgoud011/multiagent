@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h1>🏪 Smart Retail</h1>
+        <p class="subtitle">Kirana Store Management System</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" placeholder="9876543210" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+
+        <p class="link">Don't have an account? <a href="/register">Register here</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = await api('/api/auth/login', 'POST', {
+            phone: document.getElementById('phone').value,
+            password: document.getElementById('password').value,
+        });
+        if (data) {
+            showToast('Login successful!');
+            setTimeout(() => { window.location.href = '/'; }, 500);
+        }
+    });
+</script>
+{% endblock %}
