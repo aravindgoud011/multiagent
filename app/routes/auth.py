@@ -26,7 +26,8 @@ def register():
     if User.query.filter_by(phone=phone).first():
         return jsonify({"error": "Phone number already registered"}), 409
 
-    user = User(name=name, phone=phone, role=role)
+    status = "approved" if role == "admin" else "pending"
+    user = User(name=name, phone=phone, role=role, status=status)
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
@@ -47,6 +48,9 @@ def login():
 
     if not user or not user.check_password(password):
         return jsonify({"error": "Invalid phone or password"}), 401
+
+    if user.status != "approved":
+        return jsonify({"error": "Your account is pending admin approval"}), 403
 
     # Store user info in session
     session["user_id"] = user.id

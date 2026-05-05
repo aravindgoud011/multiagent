@@ -15,6 +15,7 @@ class User(db.Model):
     phone = db.Column(db.String(15), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(10), nullable=False, default="customer")  # "admin" or "customer"
+    status = db.Column(db.String(20), nullable=False, default="pending") # "pending", "approved", "rejected"
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # --- Relationships ---
@@ -37,6 +38,7 @@ class User(db.Model):
             "name": self.name,
             "phone": self.phone,
             "role": self.role,
+            "status": self.status,
             "created_at": self.created_at.isoformat(),
         }
 

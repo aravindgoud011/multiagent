@@ -1,35 +1,106 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
+<style>
+    .admin-layout {
+        display: flex;
+        min-height: calc(100vh - 63px);
+    }
+    .sidebar {
+        width: 250px;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem 0;
+    }
+    .sidebar-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        padding: 1rem 1.5rem;
+        text-align: left;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .sidebar-btn:hover {
+        background: var(--surface2);
+        color: var(--text);
+    }
+    .sidebar-btn.active {
+        color: var(--primary-light);
+        background: var(--surface2);
+        border-left-color: var(--primary);
+    }
+    .main-content {
+        flex-grow: 1;
+        padding: 2rem;
+        background: var(--bg);
+        overflow-y: auto;
+    }
+</style>
 
-<!-- Navbar -->
 <nav class="navbar">
     <div class="logo">🏪 Smart Retail — Admin</div>
-    <div class="user-info">
+    <div class="user-info" style="display: flex; align-items: center; gap: 15px;">
+        <!-- Notification Bell -->
+        <div style="position: relative; cursor: pointer;" onclick="toggleNotifications()">
+            <span style="font-size: 20px;">🔔</span>
+            <span id="notifBadge" class="badge badge-danger" style="position: absolute; top: -5px; right: -10px; font-size: 10px; padding: 2px 5px; display: none;">0</span>
+            
+            <!-- Dropdown -->
+            <div id="notifDropdown" class="card" style="display: none; position: absolute; top: 35px; right: -10px; width: 320px; z-index: 1000; padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+                <h4 style="margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">Notifications</h4>
+                <div id="notifList" style="max-height: 250px; overflow-y: auto;">
+                    <p class="text-dim" style="font-size: 12px;">No new notifications</p>
+                </div>
+            </div>
+        </div>
+
         <span id="adminName"></span>
         <button class="btn-logout" onclick="logout()">Logout</button>
     </div>
 </nav>
 
-<div class="container">
-    <!-- Stats -->
-    <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-value" id="statProducts">0</div><div class="stat-label">Total Products</div></div>
-        <div class="stat-card"><div class="stat-value" id="statLowStock">0</div><div class="stat-label">Low Stock Items</div></div>
-        <div class="stat-card"><div class="stat-value" id="statBills">0</div><div class="stat-label">Total Bills</div></div>
-        <div class="stat-card"><div class="stat-value" id="statCustomers">0</div><div class="stat-label">Customers</div></div>
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <button class="sidebar-btn active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
+        <button class="sidebar-btn" onclick="switchTab('inventory')">📦 Inventory</button>
+        <button class="sidebar-btn" onclick="switchTab('lowstock')">⚠️ Low Stock</button>
+        <button class="sidebar-btn" onclick="switchTab('create_bill')">🧾 Create Bill</button>
+        <button class="sidebar-btn" onclick="switchTab('bills_history')">📋 Bills History</button>
+        <button class="sidebar-btn" onclick="switchTab('record_payment')">💳 Record Payment</button>
+        <button class="sidebar-btn" onclick="switchTab('payment_history')">📜 Payment History</button>
+        <button class="sidebar-btn" onclick="switchTab('credit')">📊 Credit Tracker</button>
+        <button class="sidebar-btn" onclick="switchTab('customers')">👥 Customers</button>
+        <button class="sidebar-btn" onclick="switchTab('pending_approvals')">⏳ Pending Approvals</button>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('inventory')">📦 Inventory</button>
-        <button class="tab-btn" onclick="switchTab('billing')">🧾 Billing</button>
-        <button class="tab-btn" onclick="switchTab('payments')">💳 Payments</button>
-        <button class="tab-btn" onclick="switchTab('credit')">📊 Credit Tracker</button>
-    </div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- ==================== DASHBOARD TAB ==================== -->
+        <div class="tab-content active" id="tab-dashboard">
+            <h1 style="margin-bottom: 5px;">Welcome Back, <span id="welcomeName">Admin</span>! 👋</h1>
+            <p class="text-dim" style="margin-bottom: 2rem;">Here's an overview of your store's performance today.</p>
+            
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card"><div class="stat-value" id="statProducts">0</div><div class="stat-label">Total Products</div></div>
+                <div class="stat-card"><div class="stat-value" id="statLowStock">0</div><div class="stat-label">Low Stock Items</div></div>
+                <div class="stat-card"><div class="stat-value" id="statBills">0</div><div class="stat-label">Total Bills</div></div>
+                <div class="stat-card"><div class="stat-value" id="statCustomers">0</div><div class="stat-label">Customers</div></div>
+            </div>
+        </div>
 
-    <!-- ==================== INVENTORY TAB ==================== -->
-    <div class="tab-content active" id="tab-inventory">
+        <!-- ==================== INVENTORY TAB ==================== -->
+        <div class="tab-content" id="tab-inventory">
         <div class="card">
             <div class="flex-between">
                 <h2>📦 Product Inventory</h2>
@@ -45,9 +116,11 @@
                 <tbody id="productTable"></tbody>
             </table>
         </div>
+    </div>
 
-        <!-- Low Stock Alert -->
-        <div class="card" id="lowStockCard" style="display:none;">
+    <!-- ==================== LOW STOCK TAB ==================== -->
+    <div class="tab-content" id="tab-lowstock">
+        <div class="card" id="lowStockCard">
             <h2 style="color: var(--danger);">⚠️ Low Stock Alerts</h2>
             <table>
                 <thead><tr><th>Name</th><th>Stock</th><th>Threshold</th></tr></thead>
@@ -56,8 +129,8 @@
         </div>
     </div>
 
-    <!-- ==================== BILLING TAB ==================== -->
-    <div class="tab-content" id="tab-billing">
+    <!-- ==================== CREATE BILL TAB ==================== -->
+    <div class="tab-content" id="tab-create_bill">
         <div class="card">
             <h2>🧾 Create New Bill</h2>
             <form id="billForm">
@@ -97,8 +170,10 @@
                 <button type="submit" class="btn btn-success">Create Bill</button>
             </form>
         </div>
+    </div>
 
-        <!-- Bills History -->
+    <!-- ==================== BILLS HISTORY TAB ==================== -->
+    <div class="tab-content" id="tab-bills_history">
         <div class="card">
             <h2>📋 Recent Bills</h2>
             <table>
@@ -108,8 +183,8 @@
         </div>
     </div>
 
-    <!-- ==================== PAYMENTS TAB ==================== -->
-    <div class="tab-content" id="tab-payments">
+    <!-- ==================== RECORD PAYMENT TAB ==================== -->
+    <div class="tab-content" id="tab-record_payment">
         <div class="card">
             <h2>💳 Record Payment</h2>
             <form id="paymentForm">
@@ -139,7 +214,10 @@
                 <button type="submit" class="btn btn-success">Record Payment</button>
             </form>
         </div>
+    </div>
 
+    <!-- ==================== PAYMENT HISTORY TAB ==================== -->
+    <div class="tab-content" id="tab-payment_history">
         <div class="card">
             <h2>📋 Payment History</h2>
             <table>
@@ -156,6 +234,28 @@
             <table>
                 <thead><tr><th>Customer</th><th>Phone</th><th>Credit Total (₹)</th><th>Paid (₹)</th><th>Due (₹)</th><th>Status</th></tr></thead>
                 <tbody id="creditTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== CUSTOMERS TAB ==================== -->
+    <div class="tab-content" id="tab-customers">
+        <div class="card">
+            <h2>✅ Approved Customers</h2>
+            <table>
+                <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Date</th></tr></thead>
+                <tbody id="approvedCustomersTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== PENDING APPROVALS TAB ==================== -->
+    <div class="tab-content" id="tab-pending_approvals">
+        <div class="card">
+            <h2>⏳ Pending Approvals</h2>
+            <table>
+                <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody id="pendingCustomersTable"></tbody>
             </table>
         </div>
     </div>
@@ -196,29 +296,55 @@
     let allCustomers = [];
     let customerMap = {};  // id -> name
 
+    // ─── NOTIFICATIONS ───
+    function toggleNotifications() {
+        const drop = document.getElementById('notifDropdown');
+        drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+        const drop = document.getElementById('notifDropdown');
+        if (drop.style.display === 'block' && !e.target.closest('.user-info')) {
+            drop.style.display = 'none';
+        }
+    });
+
     // ─── Init ───
     window.addEventListener('DOMContentLoaded', async () => {
         const me = await api('/api/auth/me');
-        if (me) document.getElementById('adminName').textContent = `Hello, ${me.user.name}`;
+        if (me) {
+            document.getElementById('adminName').textContent = `Hello, ${me.user.name}`;
+            const welcomeEl = document.getElementById('welcomeName');
+            if(welcomeEl) welcomeEl.textContent = me.user.name;
+        }
         loadAll();
+        // Periodically refresh pending customers for notifications
+        setInterval(loadPendingCustomers, 30000); 
     });
 
     async function loadAll() {
-        await Promise.all([loadProducts(), loadCustomers(), loadBills(), loadPayments(), loadLowStock()]);
+        await Promise.all([loadProducts(), loadCustomers(), loadPendingCustomers(), loadBills(), loadPayments(), loadLowStock()]);
         loadCreditSummary();
     }
 
     // ─── Tab Switching ───
     function switchTab(name) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(`tab-${name}`).classList.add('active');
-        event.target.classList.add('active');
+        event.currentTarget.classList.add('active');
 
         // Refresh data when switching tabs
-        if (name === 'billing') { loadBills(); loadCustomers(); loadProducts(); }
-        if (name === 'payments') { loadPayments(); loadCustomers(); }
+        if (name === 'dashboard') { loadAll(); }
+        if (name === 'create_bill') { loadCustomers(); loadProducts(); }
+        if (name === 'bills_history') { loadBills(); }
+        if (name === 'record_payment') { loadCustomers(); }
+        if (name === 'payment_history') { loadPayments(); }
         if (name === 'credit') { loadCreditSummary(); }
+        if (name === 'customers') { loadCustomers(); }
+        if (name === 'pending_approvals') { loadPendingCustomers(); }
+        if (name === 'lowstock') { loadLowStock(); }
     }
 
     // ─── INVENTORY ───
@@ -257,7 +383,6 @@
         document.getElementById('statLowStock').textContent = data.count;
 
         if (data.count > 0) {
-            document.getElementById('lowStockCard').style.display = 'block';
             document.getElementById('lowStockTable').innerHTML = data.products.map(p => `
                 <tr>
                     <td>${p.name}</td>
@@ -266,7 +391,7 @@
                 </tr>
             `).join('');
         } else {
-            document.getElementById('lowStockCard').style.display = 'none';
+            document.getElementById('lowStockTable').innerHTML = '<tr><td colspan="3" class="text-center text-dim">No low stock items</td></tr>';
         }
     }
 
@@ -340,6 +465,86 @@
         const options = allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
         document.getElementById('billCustomer').innerHTML = '<option value="">Select customer</option>' + options;
         document.getElementById('payCustomer').innerHTML = '<option value="">Select customer</option>' + options;
+
+        const approvedTbody = document.getElementById('approvedCustomersTable');
+        if (approvedTbody) {
+            approvedTbody.innerHTML = allCustomers.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.phone}</td>
+                    <td class="text-dim">${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    async function loadPendingCustomers() {
+        const data = await api('/api/billing/customers/pending');
+        if (!data) return;
+        
+        const count = data.customers.length;
+        const badge = document.getElementById('notifBadge');
+        if (count > 0) {
+            badge.style.display = 'block';
+            badge.textContent = count;
+        } else {
+            badge.style.display = 'none';
+        }
+
+        const notifList = document.getElementById('notifList');
+        if (count > 0) {
+            notifList.innerHTML = data.customers.map(c => `
+                <div style="padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px;">
+                    <strong>${c.name}</strong> (${c.phone}) requested access.<br>
+                    <div style="margin-top: 5px;">
+                        <button class="btn btn-sm btn-success" style="padding: 2px 8px; font-size: 11px;" onclick="approveCustomer(${c.id})">Accept</button>
+                        <button class="btn btn-sm btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="rejectCustomer(${c.id})">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            notifList.innerHTML = '<p class="text-dim" style="font-size: 12px; padding: 10px;">No new notifications</p>';
+        }
+
+        const tbody = document.getElementById('pendingCustomersTable');
+        if (tbody) {
+            if (count > 0) {
+                tbody.innerHTML = data.customers.map(c => `
+                    <tr>
+                        <td>${c.id}</td>
+                        <td><strong>${c.name}</strong></td>
+                        <td>${c.phone}</td>
+                        <td class="text-dim">${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="approveCustomer(${c.id})">Approve</button>
+                            <button class="btn btn-sm btn-danger" onclick="rejectCustomer(${c.id})">Reject</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-dim">No pending approvals</td></tr>';
+            }
+        }
+    }
+
+    async function approveCustomer(id) {
+        if (!confirm('Approve this customer?')) return;
+        const data = await api(`/api/billing/customers/${id}/approve`, 'POST');
+        if (data) {
+            showToast('Customer approved!');
+            loadCustomers();
+            loadPendingCustomers();
+        }
+    }
+
+    async function rejectCustomer(id) {
+        if (!confirm('Reject and delete this customer?')) return;
+        const data = await api(`/api/billing/customers/${id}/reject`, 'POST');
+        if (data) {
+            showToast('Customer rejected.');
+            loadPendingCustomers();
+        }
     }
 
     // ─── BILLING ───

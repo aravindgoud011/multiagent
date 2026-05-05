@@ -119,5 +119,35 @@ def customer_bills(customer_id):
 @admin_required
 def list_customers():
     """List all customers (for billing dropdown)."""
-    customers = User.query.filter_by(role="customer").order_by(User.name).all()
+    customers = User.query.filter_by(role="customer", status="approved").order_by(User.name).all()
     return jsonify({"customers": [c.to_dict() for c in customers]}), 200
+
+
+@billing_bp.route("/customers/pending", methods=["GET"])
+@admin_required
+def list_pending_customers():
+    """List all pending customers."""
+    customers = User.query.filter_by(role="customer", status="pending").order_by(User.name).all()
+    return jsonify({"customers": [c.to_dict() for c in customers]}), 200
+
+@billing_bp.route("/customers/<int:user_id>/approve", methods=["POST"])
+@admin_required
+def approve_customer(user_id):
+    """Approve a customer."""
+    customer = User.query.get(user_id)
+    if not customer or customer.role != "customer":
+        return jsonify({"error": "Customer not found"}), 404
+    customer.status = "approved"
+    db.session.commit()
+    return jsonify({"message": "Customer approved"}), 200
+
+@billing_bp.route("/customers/<int:user_id>/reject", methods=["POST"])
+@admin_required
+def reject_customer(user_id):
+    """Reject (delete) a customer."""
+    customer = User.query.get(user_id)
+    if not customer or customer.role != "customer":
+        return jsonify({"error": "Customer not found"}), 404
+    db.session.delete(customer)
+    db.session.commit()
+    return jsonify({"message": "Customer rejected"}), 200
