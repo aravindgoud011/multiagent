@@ -99,6 +99,16 @@ def create_azure_sql_tables():
                 price_per_unit FLOAT NOT NULL,
                 subtotal FLOAT NOT NULL
             )
+            """,
+            """
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='notification' and xtype='U')
+            CREATE TABLE notification (
+                id INT IDENTITY(1,1) PRIMARY KEY,
+                title NVARCHAR(100) NOT NULL,
+                message NVARCHAR(500) NOT NULL,
+                is_read BIT DEFAULT 0,
+                created_at DATETIME NOT NULL DEFAULT GETUTCDATE()
+            )
             """
         ]
         

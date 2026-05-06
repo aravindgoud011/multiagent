@@ -39,16 +39,21 @@ def record_payment():
         (customer_id, float(amount), payment_mode, note)
     )
 
-    # Automatically mark oldest unpaid bills as paid using the payment amount
-    amount_left = float(amount)
-    cursor.execute("SELECT id, final_amount FROM bill WHERE customer_id = ? AND status = 'unpaid' ORDER BY created_at ASC", customer_id)
-    for ub in cursor.fetchall():
-        if amount_left >= ub.final_amount:
-            cursor.execute("UPDATE bill SET status = 'paid' WHERE id = ?", ub.id)
-            amount_left -= ub.final_amount
+    # Recalculate all bill statuses based on total payments
+    cursor.execute("SELECT SUM(amount) FROM payment WHERE customer_id = ?", customer_id)
+    total_paid = cursor.fetchone()[0] or 0.0
+    
+    cursor.execute("SELECT id, final_amount FROM bill WHERE customer_id = ? ORDER BY created_at ASC", customer_id)
+    bills = cursor.fetchall()
+    
+    for b_id, b_amount in bills:
+        if total_paid >= b_amount:
+            cursor.execute("UPDATE bill SET status = 'paid' WHERE id = ?", b_id)
+            total_paid -= b_amount
         else:
-            break
-
+            cursor.execute("UPDATE bill SET status = 'unpaid' WHERE id = ?", b_id)
+            # We don't subtract here, just continue to ensure rest are unpaid
+            
     conn.commit()
     
     cursor.execute("SELECT @@IDENTITY AS id")
@@ -83,15 +88,20 @@ def customer_pay():
         (customer_id, float(amount), payment_mode, note)
     )
 
-    amount_left = float(amount)
-    cursor.execute("SELECT id, final_amount FROM bill WHERE customer_id = ? AND status = 'unpaid' ORDER BY created_at ASC", customer_id)
-    for ub in cursor.fetchall():
-        if amount_left >= ub.final_amount:
-            cursor.execute("UPDATE bill SET status = 'paid' WHERE id = ?", ub.id)
-            amount_left -= ub.final_amount
+    # Recalculate all bill statuses based on total payments
+    cursor.execute("SELECT SUM(amount) FROM payment WHERE customer_id = ?", customer_id)
+    total_paid = cursor.fetchone()[0] or 0.0
+    
+    cursor.execute("SELECT id, final_amount FROM bill WHERE customer_id = ? ORDER BY created_at ASC", customer_id)
+    bills = cursor.fetchall()
+    
+    for b_id, b_amount in bills:
+        if total_paid >= b_amount:
+            cursor.execute("UPDATE bill SET status = 'paid' WHERE id = ?", b_id)
+            total_paid -= b_amount
         else:
-            break
-
+            cursor.execute("UPDATE bill SET status = 'unpaid' WHERE id = ?", b_id)
+            
     conn.commit()
     
     cursor.execute("SELECT @@IDENTITY AS id")

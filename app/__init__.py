@@ -38,6 +38,7 @@ def create_app():
     from .routes.payments import payments_bp
     from .routes.customer import customer_bp
     from .routes.pages import pages_bp
+    from .routes.notifications import notifications_bp
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -45,5 +46,6 @@ def create_app():
     app.register_blueprint(billing_bp, url_prefix="/api/billing")
     app.register_blueprint(payments_bp, url_prefix="/api/payments")
     app.register_blueprint(customer_bp, url_prefix="/api/customer")
+    app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
 
     return app

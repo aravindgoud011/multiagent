@@ -80,6 +80,15 @@ def create_bill():
             )
             
             cursor.execute("UPDATE product SET stock = stock - ? WHERE id = ?", (qty, product_id))
+            
+            # Low Stock Check
+            cursor.execute("SELECT stock, low_stock_threshold FROM product WHERE id = ?", product_id)
+            stock_row = cursor.fetchone()
+            if stock_row and stock_row.stock <= stock_row.low_stock_threshold:
+                cursor.execute(
+                    "INSERT INTO notification (title, message) VALUES (?, ?)",
+                    ("Low Stock Alert", f"Product '{p_row.name}' is low on stock! Remaining: {stock_row.stock}")
+                )
 
         cursor.execute("UPDATE bill SET total_amount = ?, final_amount = ? WHERE id = ?", (total, total, bill_id))
         
@@ -133,7 +142,35 @@ def dashboard_stats():
         GROUP BY p.category
     """)
     sales_data = [{"category": row[0] or "Other", "sales": row[1]} for row in cursor.fetchall()]
-    
+
+    # Sales Trend (Line Chart - Last 7 Days)
+    # Note: SQL Server specific query for date grouping
+    cursor.execute("""
+        SELECT CAST(created_at AS DATE) as date, SUM(amount) as total
+        FROM payment
+        WHERE created_at >= DATEADD(day, -7, GETUTCDATE())
+        GROUP BY CAST(created_at AS DATE)
+        ORDER BY date
+    """)
+    trend_rows = cursor.fetchall()
+    sales_trend = [{"date": str(row[0]), "total": row[1]} for row in trend_rows]
+
+    # Low Stock Items List
+    cursor.execute("SELECT id, name, stock, low_stock_threshold FROM product WHERE stock <= low_stock_threshold")
+    low_stock_list = []
+    for row in cursor.fetchall():
+        low_stock_list.append({
+            "id": row.id,
+            "name": row.name,
+            "stock": row.stock,
+            "threshold": row.low_stock_threshold,
+            "status": "Critical" if row.stock <= 5 else "Warning"
+        })
+
+    # Recent Alerts (Latest 5 notifications)
+    cursor.execute("SELECT TOP 5 title, message, created_at FROM notification ORDER BY created_at DESC")
+    alerts = [{"title": row.title, "message": row.message, "time": row.created_at.isoformat()} for row in cursor.fetchall()]
+
     conn.close()
     
     return jsonify({
@@ -141,7 +178,10 @@ def dashboard_stats():
         "pending_bills": pending_bills,
         "low_stock": low_stock,
         "customers_count": customers_count,
-        "sales_data": sales_data
+        "sales_data": sales_data,
+        "sales_trend": sales_trend,
+        "low_stock_list": low_stock_list,
+        "alerts": alerts
     }), 200
 
 
@@ -218,7 +258,7 @@ def customer_bills(customer_id):
 def list_customers():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE role = 'customer' AND status = 'approved' ORDER BY name")
+    cursor.execute("SELECT * FROM users WHERE role = 'customer' ORDER BY name")
     customers = []
     for row in cursor.fetchall():
         customers.append(User(id=row.id, name=row.name, phone=row.phone, role=row.role, status=row.status, created_at=row.created_at))
@@ -271,3 +311,40 @@ def reject_customer(user_id):
     conn.commit()
     conn.close()
     return jsonify({"message": "Customer rejected"}), 200
+@billing_bp.route("/receipt/<int:bill_id>", methods=["GET"])
+def get_receipt(bill_id):
+    """Fetch full bill details and items for receipt/invoice."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # 1. Get Bill Header
+    cursor.execute("SELECT * FROM bill WHERE id = ?", bill_id)
+    b_row = cursor.fetchone()
+    if not b_row:
+        conn.close()
+        return jsonify({"error": "Bill not found"}), 404
+        
+    bill = Bill(id=b_row.id, customer_id=b_row.customer_id, customer_name=b_row.customer_name, bill_type=b_row.bill_type, total_amount=b_row.total_amount, final_amount=b_row.final_amount, status=b_row.status, created_at=b_row.created_at)
+    
+    # 2. Get Bill Items
+    cursor.execute("""
+        SELECT bi.*, p.name as product_name 
+        FROM bill_item bi
+        JOIN product p ON bi.product_id = p.id
+        WHERE bi.bill_id = ?
+    """, bill_id)
+    
+    items = []
+    for row in cursor.fetchall():
+        items.append({
+            "product_name": row.product_name,
+            "quantity": row.quantity,
+            "price_per_unit": row.price_per_unit,
+            "subtotal": row.subtotal
+        })
+        
+    conn.close()
+    return jsonify({
+        "bill": bill.to_dict(),
+        "items": items
+    }), 200

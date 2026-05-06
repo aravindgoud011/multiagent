@@ -43,6 +43,14 @@ def register():
             "INSERT INTO users (name, phone, password_hash, role, status) VALUES (?, ?, ?, ?, ?)",
             (user.name, user.phone, user.password_hash, user.role, user.status)
         )
+        
+        # Create Notification for admin if it's a customer
+        if role == 'customer':
+            cursor.execute(
+                "INSERT INTO notification (title, message) VALUES (?, ?)",
+                ("New Registration", f"Customer {name} ({phone}) has registered and is pending approval.")
+            )
+            
         conn.commit()
         
         cursor.execute("SELECT id, created_at FROM users WHERE phone = ?", phone)
@@ -116,3 +124,14 @@ def me():
         
     user = User(id=row.id, name=row.name, phone=row.phone, role=row.role, status=row.status, created_at=row.created_at)
     return jsonify({"user": user.to_dict()}), 200
+@auth_bp.route("/approve/<int:user_id>", methods=["POST"])
+def approve_user(user_id):
+    if "user_id" not in session or session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET status = 'approved' WHERE id = ?", user_id)
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "User approved successfully"}), 200
