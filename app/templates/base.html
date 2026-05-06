@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Smart Retail{% endblock %} — Kirana Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -13,19 +13,22 @@
         @import url('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css');
 
         :root {
-            --bg: #f4f6f8;
+            --bg: #f5f7fb;
             --surface: #ffffff;
-            --surface2: #f1f3f5;
+            --surface2: #f8fafc;
             --border: #e2e8f0;
+            --border-light: #f1f5f9;
             --text: #1e293b;
             --text-dim: #64748b;
-            --primary: #0ea5e9;
-            --primary-light: #38bdf8;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --sidebar: #0f172a;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
             --accent: #8b5cf6;
             --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         body {
@@ -33,6 +36,7 @@
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* ─── Navbar ─── */
