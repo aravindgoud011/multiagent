@@ -1,20 +1,15 @@
 """
-Payment model — Records cash/UPI payments against a customer's credit.
+Payment model.
 """
 
-from datetime import datetime
-from ..extensions import db
-
-
-class Payment(db.Model):
-    __tablename__ = "payments"
-
-    id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    amount = db.Column(db.Float, nullable=False)
-    payment_mode = db.Column(db.String(10), nullable=False)  # "cash" or "upi"
-    note = db.Column(db.String(255), nullable=True)           # optional remark
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+class Payment:
+    def __init__(self, id=None, customer_id=None, amount=0.0, payment_mode="cash", note=None, created_at=None):
+        self.id = id
+        self.customer_id = customer_id
+        self.amount = amount
+        self.payment_mode = payment_mode
+        self.note = note
+        self.created_at = created_at
 
     def to_dict(self):
         return {
@@ -23,8 +18,5 @@ class Payment(db.Model):
             "amount": self.amount,
             "payment_mode": self.payment_mode,
             "note": self.note,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
-
-    def __repr__(self):
-        return f"<Payment ₹{self.amount} by Customer #{self.customer_id}>"

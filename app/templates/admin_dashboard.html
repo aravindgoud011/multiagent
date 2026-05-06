@@ -1,690 +1,903 @@
 {% extends "base.html" %}
+
 {% block title %}Admin Dashboard{% endblock %}
+
 {% block content %}
 <style>
-    .admin-layout {
-        display: flex;
-        min-height: calc(100vh - 63px);
-    }
-    .sidebar {
-        width: 250px;
-        background: var(--surface);
-        border-right: 1px solid var(--border);
-        display: flex;
-        flex-direction: column;
-        padding: 1rem 0;
-    }
-    .sidebar-btn {
-        background: transparent;
-        border: none;
-        color: var(--text-dim);
-        padding: 1rem 1.5rem;
-        text-align: left;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.95rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        border-left: 3px solid transparent;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .sidebar-btn:hover {
-        background: var(--surface2);
-        color: var(--text);
-    }
-    .sidebar-btn.active {
-        color: var(--primary-light);
-        background: var(--surface2);
-        border-left-color: var(--primary);
-    }
-    .main-content {
-        flex-grow: 1;
-        padding: 2rem;
-        background: var(--bg);
-        overflow-y: auto;
-    }
+    .dashboard-layout { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 250px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+    .sidebar-header { padding: 1.5rem; font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid var(--border); }
+    .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+    .nav-item { padding: 0.8rem 1.5rem; display: flex; align-items: center; gap: 0.8rem; cursor: pointer; color: var(--text-dim); transition: all 0.2s; font-weight: 500; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: rgba(14, 165, 233, 0.1); color: var(--primary); border-left-color: var(--primary); }
+    
+    .main-content { flex: 1; display: flex; flex-direction: column; background: var(--bg); overflow-y: auto; position: relative; }
+    .topbar { padding: 1rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    
+    .content-area { padding: 2rem; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Dashboard Stats */
+    .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .ml-placeholder { background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(14, 165, 233, 0.1)); border: 1px dashed var(--accent); padding: 2rem; text-align: center; border-radius: var(--radius); margin-bottom: 1.5rem; color: var(--accent); font-weight: 600;}
+    .chart-container { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); height: 300px; display: flex; justify-content: center; align-items: center; }
+
+    /* Inventory POS */
+    .category-scroll { display: flex; gap: 1rem; overflow-x: auto; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .cat-btn { padding: 0.5rem 1.5rem; border: 1px solid var(--border); background: var(--surface); border-radius: 20px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: 0.2s; }
+    .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+    .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: 0.2s; display: flex; flex-direction: column; }
+    .product-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-color: var(--primary-light); }
+    .product-img { width: 100%; height: 150px; object-fit: cover; background: var(--surface2); }
+    .product-info { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
+    .product-title { font-weight: 600; margin-bottom: 0.2rem; }
+    .product-price { color: var(--success); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .product-meta { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem; flex: 1; }
+    .product-actions { display: flex; gap: 0.5rem; }
+    
+    /* Cart Overlay */
+    .cart-overlay { position: fixed; right: 0; top: 0; bottom: 0; width: 350px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: -5px 0 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transform: translateX(100%); transition: 0.3s ease; z-index: 100; }
+    .cart-overlay.active { transform: translateX(0); }
+    .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 1rem; }
+    .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--surface2); }
+    .cart-footer { padding: 1.5rem; border-top: 1px solid var(--border); background: var(--surface2); }
+    .qty-controls { display: flex; align-items: center; gap: 0.5rem; }
+    .qty-btn { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+    /* Floating Bill Btn */
+    .fab-bill { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); cursor: pointer; transition: 0.2s; z-index: 90; }
+    .fab-bill:hover { transform: scale(1.1); }
+
+    /* QR Code */
+    #qrCodeContainer { display: flex; justify-content: center; margin: 1rem 0; display: none; }
+    #qrCodeContainer img { border-radius: 8px; border: 1px solid var(--border); padding: 0.5rem; background: white; }
+
+    .customer-list-item { padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.5rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--surface); transition: 0.2s; }
+    .customer-list-item:hover { border-color: var(--primary); }
 </style>
 
-<nav class="navbar">
-    <div class="logo">🏪 Smart Retail — Admin</div>
-    <div class="user-info" style="display: flex; align-items: center; gap: 15px;">
-        <!-- Notification Bell -->
-        <div style="position: relative; cursor: pointer;" onclick="toggleNotifications()">
-            <span style="font-size: 20px;">🔔</span>
-            <span id="notifBadge" class="badge badge-danger" style="position: absolute; top: -5px; right: -10px; font-size: 10px; padding: 2px 5px; display: none;">0</span>
-            
-            <!-- Dropdown -->
-            <div id="notifDropdown" class="card" style="display: none; position: absolute; top: 35px; right: -10px; width: 320px; z-index: 1000; padding: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
-                <h4 style="margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px;">Notifications</h4>
-                <div id="notifList" style="max-height: 250px; overflow-y: auto;">
-                    <p class="text-dim" style="font-size: 12px;">No new notifications</p>
-                </div>
-            </div>
-        </div>
-
-        <span id="adminName"></span>
-        <button class="btn-logout" onclick="logout()">Logout</button>
-    </div>
-</nav>
-
-<div class="admin-layout">
+<div class="dashboard-layout">
     <!-- Sidebar -->
     <div class="sidebar">
-        <button class="sidebar-btn active" onclick="switchTab('dashboard')">🏠 Dashboard</button>
-        <button class="sidebar-btn" onclick="switchTab('inventory')">📦 Inventory</button>
-        <button class="sidebar-btn" onclick="switchTab('lowstock')">⚠️ Low Stock</button>
-        <button class="sidebar-btn" onclick="switchTab('create_bill')">🧾 Create Bill</button>
-        <button class="sidebar-btn" onclick="switchTab('bills_history')">📋 Bills History</button>
-        <button class="sidebar-btn" onclick="switchTab('record_payment')">💳 Record Payment</button>
-        <button class="sidebar-btn" onclick="switchTab('payment_history')">📜 Payment History</button>
-        <button class="sidebar-btn" onclick="switchTab('credit')">📊 Credit Tracker</button>
-        <button class="sidebar-btn" onclick="switchTab('customers')">👥 Customers</button>
-        <button class="sidebar-btn" onclick="switchTab('pending_approvals')">⏳ Pending Approvals</button>
+        <div class="sidebar-header">
+            <span style="color: var(--primary);">Smart</span> Retail
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-item active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+            <div class="nav-item" onclick="switchTab('inventory')">📦 Inventory / POS</div>
+            <div class="nav-item" onclick="switchTab('bills')">🧾 Bills History</div>
+            <div class="nav-item" onclick="switchTab('payments')">💳 Payment History</div>
+            <div class="nav-item" onclick="switchTab('customers')">👥 Customers</div>
+        </div>
     </div>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- ==================== DASHBOARD TAB ==================== -->
-        <div class="tab-content active" id="tab-dashboard">
-            <h1 style="margin-bottom: 5px;">Welcome Back, <span id="welcomeName">Admin</span>! 👋</h1>
-            <p class="text-dim" style="margin-bottom: 2rem;">Here's an overview of your store's performance today.</p>
+        <div class="topbar">
+            <h2>Welcome Back, <span style="color: var(--primary)">{{ session.user_name }}</span>! 👋</h2>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="content-area">
             
-            <div class="stats-grid" id="statsGrid">
-                <div class="stat-card"><div class="stat-value" id="statProducts">0</div><div class="stat-label">Total Products</div></div>
-                <div class="stat-card"><div class="stat-value" id="statLowStock">0</div><div class="stat-label">Low Stock Items</div></div>
-                <div class="stat-card"><div class="stat-value" id="statBills">0</div><div class="stat-label">Total Bills</div></div>
-                <div class="stat-card"><div class="stat-value" id="statCustomers">0</div><div class="stat-label">Customers</div></div>
-            </div>
-        </div>
-
-        <!-- ==================== INVENTORY TAB ==================== -->
-        <div class="tab-content" id="tab-inventory">
-        <div class="card">
-            <div class="flex-between">
-                <h2>📦 Product Inventory</h2>
-                <button class="btn btn-primary btn-sm" onclick="openAddProduct()">+ Add Product</button>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th><th>Name</th><th>Category</th><th>Price (₹)</th>
-                        <th>Stock</th><th>Unit</th><th>Status</th><th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ==================== LOW STOCK TAB ==================== -->
-    <div class="tab-content" id="tab-lowstock">
-        <div class="card" id="lowStockCard">
-            <h2 style="color: var(--danger);">⚠️ Low Stock Alerts</h2>
-            <table>
-                <thead><tr><th>Name</th><th>Stock</th><th>Threshold</th></tr></thead>
-                <tbody id="lowStockTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ==================== CREATE BILL TAB ==================== -->
-    <div class="tab-content" id="tab-create_bill">
-        <div class="card">
-            <h2>🧾 Create New Bill</h2>
-            <form id="billForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Customer</label>
-                        <select id="billCustomer" required><option value="">Select customer</option></select>
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-pane active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-revenue">₹0</div>
+                        <div class="stat-label">Total Revenue</div>
                     </div>
-                    <div class="form-group">
-                        <label>Bill Type</label>
-                        <select id="billType" onchange="togglePaymentMode()">
-                            <option value="instant">Instant (Pay Now)</option>
-                            <option value="credit">Credit (Udhar)</option>
-                        </select>
+                    <div class="stat-card">
+                        <div class="stat-value text-warning" id="stat-pending">0</div>
+                        <div class="stat-label">Pending Bills</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value text-danger" id="stat-lowstock">0</div>
+                        <div class="stat-label">Low Stock Items</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value text-accent" id="stat-customers">0</div>
+                        <div class="stat-label">Active Customers</div>
                     </div>
                 </div>
-                <div class="form-group" id="paymentModeGroup">
-                    <label>Payment Mode</label>
-                    <select id="paymentMode">
-                        <option value="cash">Cash</option>
-                        <option value="upi">UPI</option>
-                    </select>
-                </div>
 
-                <!-- Bill Items -->
-                <div class="form-group">
-                    <label>Bill Items</label>
-                    <div id="billItems">
-                        <div class="form-row mb-1">
-                            <select class="bill-product" required><option value="">Select product</option></select>
-                            <input type="number" class="bill-qty" placeholder="Qty" min="1" value="1" required>
+                <div class="dashboard-grid">
+                    <div>
+                        <div class="ml-placeholder">
+                            🤖 ML Insights: High Demand Products (Coming Soon)
+                        </div>
+                        <div class="card">
+                            <h2>Recent Alerts</h2>
+                            <p class="text-dim">Notifications about low stock and payments will appear here.</p>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm" style="background:var(--surface2);color:var(--text-dim);" onclick="addBillItemRow()">+ Add Item</button>
-                </div>
-
-                <button type="submit" class="btn btn-success">Create Bill</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ==================== BILLS HISTORY TAB ==================== -->
-    <div class="tab-content" id="tab-bills_history">
-        <div class="card">
-            <h2>📋 Recent Bills</h2>
-            <table>
-                <thead><tr><th>Bill #</th><th>Customer</th><th>Type</th><th>Total (₹)</th><th>Paid</th><th>Date</th></tr></thead>
-                <tbody id="billsTable"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- ==================== RECORD PAYMENT TAB ==================== -->
-    <div class="tab-content" id="tab-record_payment">
-        <div class="card">
-            <h2>💳 Record Payment</h2>
-            <form id="paymentForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Customer</label>
-                        <select id="payCustomer" required><option value="">Select customer</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Amount (₹)</label>
-                        <input type="number" id="payAmount" placeholder="500" min="1" step="0.01" required>
+                    <div class="chart-container">
+                        <canvas id="salesPieChart"></canvas>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Payment Mode</label>
-                        <select id="payMode">
-                            <option value="cash">Cash</option>
-                            <option value="upi">UPI</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Note (optional)</label>
-                        <input type="text" id="payNote" placeholder="May month payment">
-                    </div>
+            </div>
+
+            <!-- Inventory / POS Tab -->
+            <div id="tab-inventory" class="tab-pane">
+                <div class="flex-between mb-1">
+                    <h2>Inventory & POS</h2>
+                    <button class="btn btn-primary" onclick="openAddProductModal()">+ Add Product</button>
                 </div>
-                <button type="submit" class="btn btn-success">Record Payment</button>
-            </form>
-        </div>
-    </div>
+                
+                <div class="category-scroll" id="catFilters">
+                    <button class="cat-btn active" onclick="filterCategory('Groceries')">Groceries</button>
+                    <button class="cat-btn" onclick="filterCategory('Dairy')">Dairy</button>
+                    <button class="cat-btn" onclick="filterCategory('Vegetables')">Vegetables</button>
+                </div>
 
-    <!-- ==================== PAYMENT HISTORY TAB ==================== -->
-    <div class="tab-content" id="tab-payment_history">
-        <div class="card">
-            <h2>📋 Payment History</h2>
-            <table>
-                <thead><tr><th>ID</th><th>Customer</th><th>Amount (₹)</th><th>Mode</th><th>Note</th><th>Date</th></tr></thead>
-                <tbody id="paymentsTable"></tbody>
-            </table>
-        </div>
-    </div>
+                <div class="products-grid" id="productsGrid"></div>
+            </div>
 
-    <!-- ==================== CREDIT TAB ==================== -->
-    <div class="tab-content" id="tab-credit">
-        <div class="card">
-            <h2>📊 Customer Credit Summary</h2>
-            <table>
-                <thead><tr><th>Customer</th><th>Phone</th><th>Credit Total (₹)</th><th>Paid (₹)</th><th>Due (₹)</th><th>Status</th></tr></thead>
-                <tbody id="creditTable"></tbody>
-            </table>
-        </div>
-    </div>
+            <!-- Bills History Tab -->
+            <div id="tab-bills" class="tab-pane">
+                <h2>Bills History</h2>
+                <div class="card mt-1" style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="billsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
 
-    <!-- ==================== CUSTOMERS TAB ==================== -->
-    <div class="tab-content" id="tab-customers">
-        <div class="card">
-            <h2>✅ Approved Customers</h2>
-            <table>
-                <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Date</th></tr></thead>
-                <tbody id="approvedCustomersTable"></tbody>
-            </table>
-        </div>
-    </div>
+            <!-- Payment History Tab -->
+            <div id="tab-payments" class="tab-pane">
+                <div class="flex-between mb-1">
+                    <h2>Payment History</h2>
+                    <button class="btn btn-primary" onclick="openRecordPaymentModal()">+ Record Payment</button>
+                </div>
+                <div class="card mt-1" style="overflow-x: auto;">
+                    <table>
+                        <thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Amount</th><th>Mode</th><th>Note</th></tr></thead>
+                        <tbody id="paymentsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
 
-    <!-- ==================== PENDING APPROVALS TAB ==================== -->
-    <div class="tab-content" id="tab-pending_approvals">
-        <div class="card">
-            <h2>⏳ Pending Approvals</h2>
-            <table>
-                <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Date</th><th>Actions</th></tr></thead>
-                <tbody id="pendingCustomersTable"></tbody>
-            </table>
+            <!-- Customers Tab -->
+            <div id="tab-customers" class="tab-pane">
+                <h2>Customers Overview</h2>
+                <div class="mt-1" id="customersList"></div>
+            </div>
+
         </div>
     </div>
 </div>
 
-<!-- ==================== ADD/EDIT PRODUCT MODAL ==================== -->
+<!-- Floating Action Button for New Bill -->
+<div class="fab-bill" onclick="openStartBillModal()">+</div>
+
+<!-- Start Bill Modal -->
+<div class="modal-overlay" id="startBillModal">
+    <div class="modal">
+        <h2>Start New Bill</h2>
+        <div class="form-group">
+            <label>Bill Type</label>
+            <select id="billTypeSelect" onchange="toggleBillTypeFields()">
+                <option value="instant">Instant Customer (Cash/UPI)</option>
+                <option value="credit">Credit Customer (Account)</option>
+            </select>
+        </div>
+        <div class="form-group" id="instantNameGroup">
+            <label>Customer Name (Manual Entry)</label>
+            <input type="text" id="billCustomerName" placeholder="Enter name">
+        </div>
+        <div class="form-group" id="creditCustomerGroup" style="display: none;">
+            <label>Select Customer</label>
+            <select id="billCustomerSelect"></select>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal('startBillModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="initBillSession()">Start Billing</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Sidebar Overlay -->
+<div class="cart-overlay" id="cartOverlay">
+    <div class="cart-header">
+        <h3>Current Bill (<span id="cartTypeBadge"></span>)</h3>
+        <button class="btn-sm" style="border:none;background:transparent;cursor:pointer;" onclick="cancelBill()">❌</button>
+    </div>
+    <div style="padding: 0.5rem 1.5rem; background: var(--surface2); font-size:0.85rem;" id="cartCustomerInfo"></div>
+    <div class="cart-items" id="cartItemsList"></div>
+    <div class="cart-footer">
+        <div class="flex-between mb-1">
+            <strong>Total Amount:</strong>
+            <strong id="cartTotal" class="text-success" style="font-size:1.2rem;">₹0</strong>
+        </div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="proceedToCheckout()">Checkout</button>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal">
+    <div class="modal">
+        <h2>Checkout Payment</h2>
+        <div id="checkoutDetails" class="mb-1"></div>
+        <div class="form-group" id="paymentModeGroup">
+            <label>Payment Mode</label>
+            <select id="paymentModeSelect" onchange="generateQR()">
+                <option value="cash">Cash</option>
+                <option value="upi">UPI</option>
+            </select>
+        </div>
+        <div id="qrCodeContainer">
+            <img id="qrImage" src="" alt="UPI QR Code">
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal('checkoutModal')">Back</button>
+            <button class="btn btn-success" onclick="confirmBill()">Mark as Paid & Generate Bill</button>
+        </div>
+    </div>
+</div>
+
+<!-- Product Form Modal -->
 <div class="modal-overlay" id="productModal">
     <div class="modal">
         <h2 id="productModalTitle">Add Product</h2>
-        <form id="productForm">
-            <input type="hidden" id="editProductId">
-            <div class="form-row">
-                <div class="form-group"><label>Product Name</label><input type="text" id="prodName" required></div>
-                <div class="form-group"><label>Category</label><input type="text" id="prodCategory" placeholder="Grocery"></div>
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="prodId">
+            <div class="form-group">
+                <label>Product Image</label>
+                <input type="file" id="prodImage" accept="image/*">
+                <input type="hidden" id="prodImageUrl">
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Price (₹)</label><input type="number" id="prodPrice" min="0" step="0.01" required></div>
-                <div class="form-group"><label>Stock</label><input type="number" id="prodStock" min="0" required></div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="prodName" required>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="prodCategory">
+                        <option value="Groceries">Groceries</option>
+                        <option value="Dairy">Dairy</option>
+                        <option value="Vegetables">Vegetables</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label>Unit</label><select id="prodUnit"><option>pcs</option><option>kg</option><option>litre</option><option>dozen</option></select></div>
-                <div class="form-group"><label>Low Stock Threshold</label><input type="number" id="prodThreshold" min="0" value="10"></div>
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="prodPrice" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Current Stock</label>
+                    <input type="number" id="prodStock" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Unit</label>
+                    <input type="text" id="prodUnit" value="pcs" required>
+                </div>
+                <div class="form-group">
+                    <label>Low Stock Alert At</label>
+                    <input type="number" id="prodThreshold" value="10" required>
+                </div>
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn btn-sm" style="background:var(--surface2);color:var(--text-dim);" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <button type="button" class="btn" onclick="closeModal('productModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Product</button>
             </div>
         </form>
     </div>
 </div>
 
-{% endblock %}
+<!-- Customer Details Modal -->
+<div class="modal-overlay" id="customerModal">
+    <div class="modal" style="max-width: 600px;">
+        <h2 id="customerModalTitle">Customer Details</h2>
+        <div class="stats-grid mb-1">
+            <div class="stat-card" style="padding: 1rem;"><div class="stat-value" id="custTotalSpent" style="font-size:1.5rem;">₹0</div><div class="stat-label">Total Spent</div></div>
+            <div class="stat-card" style="padding: 1rem;"><div class="stat-value text-warning" id="custDue" style="font-size:1.5rem;">₹0</div><div class="stat-label">Pending Due</div></div>
+        </div>
+        <h3>Recent Bills</h3>
+        <div class="card mt-1" style="max-height: 250px; overflow-y:auto;">
+            <table>
+                <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody id="customerBillsBody"></tbody>
+            </table>
+        </div>
+        <h3 class="mt-1">Recent Payments</h3>
+        <div class="card mt-1" style="max-height: 200px; overflow-y:auto;">
+            <table>
+                <thead><tr><th>Date</th><th>Amount</th><th>Mode</th></tr></thead>
+                <tbody id="customerPaymentsBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal('customerModal')">Close</button>
+        </div>
+    </div>
+</div>
 
-{% block scripts %}
+<!-- Record Payment Modal -->
+<div class="modal-overlay" id="recordPaymentModal">
+    <div class="modal">
+        <h2>Record Payment</h2>
+        <div class="form-group">
+            <label>Select Customer</label>
+            <select id="payCustomerSelect"></select>
+        </div>
+        <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="payAmount" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label>Payment Mode</label>
+            <select id="payMode">
+                <option value="cash">Cash</option>
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Note</label>
+            <input type="text" id="payNote" placeholder="Optional">
+        </div>
+        <div class="modal-actions">
+            <button class="btn" onclick="closeModal('recordPaymentModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitRecordPayment()">Save Payment</button>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+    <div class="modal">
+        <h2 id="receiptTitle">Bill Receipt</h2>
+        <div id="receiptDetails" class="mb-1" style="font-size: 0.9rem; line-height: 1.5; background: var(--surface2); padding: 1rem; border-radius: 8px;"></div>
+        <table style="width:100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9rem;">
+            <thead><tr style="border-bottom: 2px solid var(--border);"><th style="padding-bottom:0.5rem;">Item</th><th style="padding-bottom:0.5rem;">Qty</th><th style="padding-bottom:0.5rem;">Price</th><th style="padding-bottom:0.5rem;">Total</th></tr></thead>
+            <tbody id="receiptItems"></tbody>
+        </table>
+        <div class="flex-between" style="font-weight: bold; font-size: 1.2rem; padding-top: 1rem; border-top: 2px solid var(--border);">
+            <span>Grand Total:</span>
+            <span id="receiptTotal" class="text-success">₹0</span>
+        </div>
+        <div class="modal-actions" style="margin-top: 1.5rem;">
+            <button class="btn" onclick="closeModal('receiptModal')">Close</button>
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // ─── Global Data ───
+    // OVERRIDE: Force bottom gravity without cache issues
+    window.showToast = function(message, type = 'success') {
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "bottom",
+            position: "right",
+            style: {
+                background: type === 'success' ? "var(--success)" : "var(--danger)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+            }
+        }).showToast();
+    };
+
     let allProducts = [];
+    let currentCategory = 'Groceries';
     let allCustomers = [];
-    let customerMap = {};  // id -> name
+    let pieChartInstance = null;
 
-    // ─── NOTIFICATIONS ───
-    function toggleNotifications() {
-        const drop = document.getElementById('notifDropdown');
-        drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
-    }
+    // Cart State
+    let cartSession = null; // { type, customerId, customerName, items: [{product, qty}] }
 
-    // Close dropdown on outside click
-    document.addEventListener('click', (e) => {
-        const drop = document.getElementById('notifDropdown');
-        if (drop.style.display === 'block' && !e.target.closest('.user-info')) {
-            drop.style.display = 'none';
+    // Navigation
+    function switchTab(tabId) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        } else {
+            // Find the nav item manually if called programmatically
+            const items = document.querySelectorAll('.nav-item');
+            items.forEach(item => {
+                if (item.getAttribute('onclick')?.includes(`'${tabId}'`)) {
+                    item.classList.add('active');
+                }
+            });
         }
-    });
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        const targetTab = document.getElementById(`tab-${tabId}`);
+        if (targetTab) targetTab.classList.add('active');
 
-    // ─── Init ───
-    window.addEventListener('DOMContentLoaded', async () => {
-        const me = await api('/api/auth/me');
-        if (me) {
-            document.getElementById('adminName').textContent = `Hello, ${me.user.name}`;
-            const welcomeEl = document.getElementById('welcomeName');
-            if(welcomeEl) welcomeEl.textContent = me.user.name;
-        }
-        loadAll();
-        // Periodically refresh pending customers for notifications
-        setInterval(loadPendingCustomers, 30000); 
-    });
-
-    async function loadAll() {
-        await Promise.all([loadProducts(), loadCustomers(), loadPendingCustomers(), loadBills(), loadPayments(), loadLowStock()]);
-        loadCreditSummary();
+        if (tabId === 'dashboard') loadDashboardStats();
+        if (tabId === 'inventory') loadProducts();
+        if (tabId === 'bills') loadBills();
+        if (tabId === 'payments') loadPayments();
+        if (tabId === 'customers') loadCustomersView();
     }
 
-    // ─── Tab Switching ───
-    function switchTab(name) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.sidebar-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(`tab-${name}`).classList.add('active');
-        event.currentTarget.classList.add('active');
+    // Modal Helpers
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // Refresh data when switching tabs
-        if (name === 'dashboard') { loadAll(); }
-        if (name === 'create_bill') { loadCustomers(); loadProducts(); }
-        if (name === 'bills_history') { loadBills(); }
-        if (name === 'record_payment') { loadCustomers(); }
-        if (name === 'payment_history') { loadPayments(); }
-        if (name === 'credit') { loadCreditSummary(); }
-        if (name === 'customers') { loadCustomers(); }
-        if (name === 'pending_approvals') { loadPendingCustomers(); }
-        if (name === 'lowstock') { loadLowStock(); }
+    // --- Dashboard ---
+    async function loadDashboardStats() {
+        const data = await api('/api/billing/dashboard_stats');
+        if (!data) return;
+        document.getElementById('stat-revenue').innerText = `₹${data.revenue.toFixed(2)}`;
+        document.getElementById('stat-pending').innerText = data.pending_bills;
+        document.getElementById('stat-lowstock').innerText = data.low_stock;
+        document.getElementById('stat-customers').innerText = data.customers_count;
+
+        renderPieChart(data.sales_data);
     }
 
-    // ─── INVENTORY ───
+    function renderPieChart(data) {
+        const ctx = document.getElementById('salesPieChart').getContext('2d');
+        if (pieChartInstance) pieChartInstance.destroy();
+        
+        const labels = data.map(d => d.category);
+        const values = data.map(d => d.sales);
+        const colors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
+
+        pieChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'var(--text)' } } } }
+        });
+    }
+
+    // --- Inventory & Cart ---
     async function loadProducts() {
         const data = await api('/api/inventory/products');
         if (!data) return;
         allProducts = data.products;
-        document.getElementById('statProducts').textContent = data.count;
-
-        const tbody = document.getElementById('productTable');
-        tbody.innerHTML = allProducts.map(p => `
-            <tr>
-                <td>${p.id}</td>
-                <td><strong>${p.name}</strong></td>
-                <td>${p.category || '—'}</td>
-                <td>₹${p.price.toFixed(2)}</td>
-                <td>${p.stock}</td>
-                <td>${p.unit}</td>
-                <td>${p.is_low_stock
-                    ? '<span class="badge badge-danger">Low Stock</span>'
-                    : '<span class="badge badge-success">In Stock</span>'}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="editProduct(${p.id})">Edit</button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Del</button>
-                </td>
-            </tr>
-        `).join('');
-
-        // Update product dropdowns in billing
-        updateProductDropdowns();
+        renderProducts();
     }
 
-    async function loadLowStock() {
-        const data = await api('/api/inventory/low-stock');
-        if (!data) return;
-        document.getElementById('statLowStock').textContent = data.count;
-
-        if (data.count > 0) {
-            document.getElementById('lowStockTable').innerHTML = data.products.map(p => `
-                <tr>
-                    <td>${p.name}</td>
-                    <td style="color:var(--danger);font-weight:600;">${p.stock}</td>
-                    <td>${p.low_stock_threshold}</td>
-                </tr>
-            `).join('');
-        } else {
-            document.getElementById('lowStockTable').innerHTML = '<tr><td colspan="3" class="text-center text-dim">No low stock items</td></tr>';
-        }
+    function filterCategory(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        renderProducts();
     }
 
-    function openAddProduct() {
-        document.getElementById('productModalTitle').textContent = 'Add Product';
+    function renderProducts() {
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = '';
+        const filtered = currentCategory ? allProducts.filter(p => p.category === currentCategory) : allProducts;
+        
+        filtered.forEach(p => {
+            const imgUrl = p.image_url || 'https://via.placeholder.com/250x150?text=No+Image';
+            let actionBtn = `<button class="btn btn-sm btn-primary" style="flex:1;" onclick="editProduct(${p.id})">Edit</button>`;
+            
+            if (cartSession) {
+                actionBtn = `<button class="btn btn-sm btn-success" style="flex:1;" onclick="addToCart(${p.id})">Add to Cart</button>`;
+            }
+
+            grid.innerHTML += `
+                <div class="product-card">
+                    <img src="${imgUrl}" class="product-img">
+                    <div class="product-info">
+                        <div class="product-title">${p.name}</div>
+                        <div class="product-price">₹${p.price.toFixed(2)}</div>
+                        <div class="product-meta">Stock: ${p.stock} ${p.unit} | ${p.category}</div>
+                        <div class="product-actions">
+                            ${actionBtn}
+                            ${!cartSession ? `<button class="btn btn-sm btn-danger" onclick="deleteProduct(${p.id})">Del</button>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // --- Product CRUD ---
+    function openAddProductModal() {
         document.getElementById('productForm').reset();
-        document.getElementById('editProductId').value = '';
-        document.getElementById('productModal').classList.add('active');
+        document.getElementById('prodId').value = '';
+        document.getElementById('prodImageUrl').value = '';
+        document.getElementById('productModalTitle').innerText = 'Add Product';
+        openModal('productModal');
     }
 
-    function editProduct(id) {
+    async function editProduct(id) {
         const p = allProducts.find(x => x.id === id);
         if (!p) return;
-        document.getElementById('productModalTitle').textContent = 'Edit Product';
-        document.getElementById('editProductId').value = p.id;
+        document.getElementById('prodId').value = p.id;
         document.getElementById('prodName').value = p.name;
-        document.getElementById('prodCategory').value = p.category || '';
+        document.getElementById('prodCategory').value = p.category || 'Other';
         document.getElementById('prodPrice').value = p.price;
         document.getElementById('prodStock').value = p.stock;
         document.getElementById('prodUnit').value = p.unit;
         document.getElementById('prodThreshold').value = p.low_stock_threshold;
-        document.getElementById('productModal').classList.add('active');
+        document.getElementById('prodImageUrl').value = p.image_url || '';
+        document.getElementById('productModalTitle').innerText = 'Edit Product';
+        openModal('productModal');
     }
 
-    function closeModal() {
-        document.getElementById('productModal').classList.remove('active');
-    }
-
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
+    async function saveProduct(e) {
         e.preventDefault();
-        const id = document.getElementById('editProductId').value;
-        const body = {
+        const id = document.getElementById('prodId').value;
+        const fileInput = document.getElementById('prodImage');
+        let imgUrl = document.getElementById('prodImageUrl').value;
+
+        // Upload image if selected
+        if (fileInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            const uploadRes = await fetch('/api/inventory/upload_image', { method: 'POST', body: formData });
+            const uploadData = await uploadRes.json();
+            if (uploadRes.ok) imgUrl = uploadData.image_url;
+        }
+
+        const payload = {
             name: document.getElementById('prodName').value,
             category: document.getElementById('prodCategory').value,
             price: parseFloat(document.getElementById('prodPrice').value),
             stock: parseInt(document.getElementById('prodStock').value),
             unit: document.getElementById('prodUnit').value,
             low_stock_threshold: parseInt(document.getElementById('prodThreshold').value),
+            image_url: imgUrl
         };
 
-        let data;
-        if (id) {
-            data = await api(`/api/inventory/products/${id}`, 'PUT', body);
-        } else {
-            data = await api('/api/inventory/products', 'POST', body);
-        }
-        if (data) {
-            showToast(id ? 'Product updated!' : 'Product added!');
-            closeModal();
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/inventory/products/${id}` : `/api/inventory/products`;
+        
+        const res = await api(url, method, payload);
+        if (res) {
+            showToast(`Product ${id ? 'updated' : 'added'}!`);
+            closeModal('productModal');
             loadProducts();
-            loadLowStock();
         }
-    });
+    }
 
     async function deleteProduct(id) {
         if (!confirm('Delete this product?')) return;
-        const data = await api(`/api/inventory/products/${id}`, 'DELETE');
-        if (data) { showToast('Product deleted'); loadProducts(); loadLowStock(); }
+        const res = await api(`/api/inventory/products/${id}`, 'DELETE');
+        if (res) {
+            showToast('Product deleted');
+            loadProducts();
+        }
     }
 
-    // ─── CUSTOMERS ───
-    async function loadCustomers() {
+    // --- Billing Flow ---
+    async function loadCustomerDropdown() {
         const data = await api('/api/billing/customers');
-        if (!data) return;
-        allCustomers = data.customers;
-        document.getElementById('statCustomers').textContent = allCustomers.length;
-
-        customerMap = {};
-        allCustomers.forEach(c => customerMap[c.id] = c.name);
-
-        const options = allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
-        document.getElementById('billCustomer').innerHTML = '<option value="">Select customer</option>' + options;
-        document.getElementById('payCustomer').innerHTML = '<option value="">Select customer</option>' + options;
-
-        const approvedTbody = document.getElementById('approvedCustomersTable');
-        if (approvedTbody) {
-            approvedTbody.innerHTML = allCustomers.map(c => `
-                <tr>
-                    <td>${c.id}</td>
-                    <td><strong>${c.name}</strong></td>
-                    <td>${c.phone}</td>
-                    <td class="text-dim">${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
-                </tr>
-            `).join('');
-        }
-    }
-
-    async function loadPendingCustomers() {
-        const data = await api('/api/billing/customers/pending');
-        if (!data) return;
-        
-        const count = data.customers.length;
-        const badge = document.getElementById('notifBadge');
-        if (count > 0) {
-            badge.style.display = 'block';
-            badge.textContent = count;
-        } else {
-            badge.style.display = 'none';
-        }
-
-        const notifList = document.getElementById('notifList');
-        if (count > 0) {
-            notifList.innerHTML = data.customers.map(c => `
-                <div style="padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px;">
-                    <strong>${c.name}</strong> (${c.phone}) requested access.<br>
-                    <div style="margin-top: 5px;">
-                        <button class="btn btn-sm btn-success" style="padding: 2px 8px; font-size: 11px;" onclick="approveCustomer(${c.id})">Accept</button>
-                        <button class="btn btn-sm btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="rejectCustomer(${c.id})">Reject</button>
-                    </div>
-                </div>
-            `).join('');
-        } else {
-            notifList.innerHTML = '<p class="text-dim" style="font-size: 12px; padding: 10px;">No new notifications</p>';
-        }
-
-        const tbody = document.getElementById('pendingCustomersTable');
-        if (tbody) {
-            if (count > 0) {
-                tbody.innerHTML = data.customers.map(c => `
-                    <tr>
-                        <td>${c.id}</td>
-                        <td><strong>${c.name}</strong></td>
-                        <td>${c.phone}</td>
-                        <td class="text-dim">${new Date(c.created_at).toLocaleDateString('en-IN')}</td>
-                        <td>
-                            <button class="btn btn-sm btn-success" onclick="approveCustomer(${c.id})">Approve</button>
-                            <button class="btn btn-sm btn-danger" onclick="rejectCustomer(${c.id})">Reject</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } else {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-dim">No pending approvals</td></tr>';
-            }
-        }
-    }
-
-    async function approveCustomer(id) {
-        if (!confirm('Approve this customer?')) return;
-        const data = await api(`/api/billing/customers/${id}/approve`, 'POST');
         if (data) {
-            showToast('Customer approved!');
-            loadCustomers();
-            loadPendingCustomers();
+            allCustomers = data.customers;
+            const sel = document.getElementById('billCustomerSelect');
+            sel.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
         }
     }
 
-    async function rejectCustomer(id) {
-        if (!confirm('Reject and delete this customer?')) return;
-        const data = await api(`/api/billing/customers/${id}/reject`, 'POST');
-        if (data) {
-            showToast('Customer rejected.');
-            loadPendingCustomers();
-        }
+    function openStartBillModal() {
+        loadCustomerDropdown();
+        document.getElementById('billCustomerName').value = '';
+        toggleBillTypeFields();
+        openModal('startBillModal');
     }
 
-    // ─── BILLING ───
-    function updateProductDropdowns() {
-        const opts = allProducts.map(p => `<option value="${p.id}">${p.name} — ₹${p.price} (stock: ${p.stock})</option>`).join('');
-        document.querySelectorAll('.bill-product').forEach(sel => {
-            const val = sel.value;
-            sel.innerHTML = '<option value="">Select product</option>' + opts;
-            sel.value = val;
-        });
+    function toggleBillTypeFields() {
+        const type = document.getElementById('billTypeSelect').value;
+        document.getElementById('instantNameGroup').style.display = type === 'instant' ? 'block' : 'none';
+        document.getElementById('creditCustomerGroup').style.display = type === 'credit' ? 'block' : 'none';
     }
 
-    function addBillItemRow() {
-        const div = document.getElementById('billItems');
-        const row = document.createElement('div');
-        row.className = 'form-row mb-1';
-        row.innerHTML = `
-            <select class="bill-product" required><option value="">Select product</option></select>
-            <input type="number" class="bill-qty" placeholder="Qty" min="1" value="1" required>
-        `;
-        div.appendChild(row);
-        updateProductDropdowns();
-    }
+    function initBillSession() {
+        const type = document.getElementById('billTypeSelect').value;
+        const name = document.getElementById('billCustomerName').value;
+        const custId = document.getElementById('billCustomerSelect').value;
 
-    function togglePaymentMode() {
-        const type = document.getElementById('billType').value;
-        document.getElementById('paymentModeGroup').style.display = type === 'instant' ? 'block' : 'none';
-    }
+        if (type === 'instant' && !name) return showToast('Please enter customer name', 'error');
+        if (type === 'credit' && !custId) return showToast('Please select a customer', 'error');
 
-    document.getElementById('billForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const products = document.querySelectorAll('.bill-product');
-        const qtys = document.querySelectorAll('.bill-qty');
-        const items = [];
-        products.forEach((sel, i) => {
-            if (sel.value) items.push({ product_id: parseInt(sel.value), quantity: parseInt(qtys[i].value) });
-        });
-
-        if (items.length === 0) { showToast('Add at least one item', 'error'); return; }
-
-        const billType = document.getElementById('billType').value;
-        const body = {
-            customer_id: parseInt(document.getElementById('billCustomer').value),
-            bill_type: billType,
-            payment_mode: billType === 'instant' ? document.getElementById('paymentMode').value : null,
-            items: items,
+        cartSession = {
+            type: type,
+            customerId: type === 'credit' ? custId : null,
+            customerName: type === 'instant' ? name : null,
+            items: []
         };
 
-        const data = await api('/api/billing/create', 'POST', body);
-        if (data) {
-            showToast(`Bill #${data.bill.id} created — ₹${data.bill.total_amount}`);
-            document.getElementById('billForm').reset();
-            document.getElementById('billItems').innerHTML = `
-                <div class="form-row mb-1">
-                    <select class="bill-product" required><option value="">Select product</option></select>
-                    <input type="number" class="bill-qty" placeholder="Qty" min="1" value="1" required>
+        closeModal('startBillModal');
+        showToast('Cart session started. Please add items from inventory.');
+        document.getElementById('cartOverlay').classList.add('active');
+        
+        // Switch to inventory to add items
+        document.querySelector('.nav-item[onclick="switchTab(\'inventory\')"]').click();
+        renderProducts(); // Re-render to show Add to Cart buttons
+        updateCartUI();
+    }
+
+    function cancelBill() {
+        cartSession = null;
+        document.getElementById('cartOverlay').classList.remove('active');
+        renderProducts(); // Remove cart buttons
+    }
+
+    function addToCart(productId) {
+        const p = allProducts.find(x => x.id === productId);
+        if (p.stock <= 0) return showToast('Out of stock!', 'error');
+        
+        const existing = cartSession.items.find(i => i.product.id === productId);
+        if (existing) {
+            if (existing.qty >= p.stock) return showToast('Max stock reached', 'error');
+            existing.qty++;
+        } else {
+            cartSession.items.push({ product: p, qty: 1 });
+        }
+        updateCartUI();
+    }
+
+    function changeCartQty(index, delta) {
+        const item = cartSession.items[index];
+        item.qty += delta;
+        if (item.qty <= 0) {
+            cartSession.items.splice(index, 1);
+        } else if (item.qty > item.product.stock) {
+            item.qty = item.product.stock;
+            showToast('Max stock reached', 'warning');
+        }
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        if (!cartSession) return;
+        document.getElementById('cartTypeBadge').innerText = cartSession.type.toUpperCase();
+        document.getElementById('cartCustomerInfo').innerText = cartSession.type === 'instant' ? `Customer: ${cartSession.customerName}` : 'Credit Account Billing';
+        
+        const list = document.getElementById('cartItemsList');
+        list.innerHTML = '';
+        let total = 0;
+        
+        cartSession.items.forEach((item, idx) => {
+            const sub = item.qty * item.product.price;
+            total += sub;
+            list.innerHTML += `
+                <div class="cart-item">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">${item.product.name}</div>
+                        <div class="text-dim">₹${item.product.price} x ${item.qty} ${item.product.unit}</div>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeCartQty(${idx}, -1)">-</button>
+                        <span>${item.qty}</span>
+                        <button class="qty-btn" onclick="changeCartQty(${idx}, 1)">+</button>
+                    </div>
                 </div>
             `;
-            updateProductDropdowns();
-            loadBills();
-            loadProducts();
-            loadLowStock();
-        }
-    });
+        });
+        document.getElementById('cartTotal').innerText = `₹${total.toFixed(2)}`;
+    }
 
+    function proceedToCheckout() {
+        if (cartSession.items.length === 0) return showToast('Cart is empty', 'error');
+        
+        const total = cartSession.items.reduce((s, i) => s + (i.qty * i.product.price), 0);
+        document.getElementById('checkoutDetails').innerHTML = `
+            <p><strong>Type:</strong> ${cartSession.type.toUpperCase()}</p>
+            <p><strong>Total Amount:</strong> ₹${total.toFixed(2)}</p>
+        `;
+        
+        const paymentGroup = document.getElementById('paymentModeGroup');
+        const qrContainer = document.getElementById('qrCodeContainer');
+        const confirmBtn = document.querySelector('#checkoutModal .btn-success');
+        
+        if (cartSession.type === 'credit') {
+            paymentGroup.style.display = 'none';
+            qrContainer.style.display = 'none';
+            confirmBtn.innerText = 'Confirm Credit Bill';
+        } else {
+            paymentGroup.style.display = 'block';
+            document.getElementById('paymentModeSelect').value = 'cash';
+            qrContainer.style.display = 'none';
+            confirmBtn.innerText = 'Mark as Paid & Generate Bill';
+        }
+        
+        openModal('checkoutModal');
+    }
+
+    function generateQR() {
+        const mode = document.getElementById('paymentModeSelect').value;
+        const qrContainer = document.getElementById('qrCodeContainer');
+        if (mode === 'upi') {
+            const total = cartSession.items.reduce((s, i) => s + (i.qty * i.product.price), 0);
+            const upiUrl = `upi://pay?pa=shop@upi&pn=SmartRetail&am=${total.toFixed(2)}&cu=INR`;
+            document.getElementById('qrImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
+            qrContainer.style.display = 'flex';
+        } else {
+            qrContainer.style.display = 'none';
+        }
+    }
+
+    async function confirmBill() {
+        const payload = {
+            bill_type: cartSession.type,
+            customer_id: cartSession.customerId,
+            customer_name: cartSession.customerName,
+            payment_mode: cartSession.type === 'instant' ? document.getElementById('paymentModeSelect').value : null,
+            items: cartSession.items.map(i => ({ product_id: i.product.id, quantity: i.qty }))
+        };
+        
+        const res = await api('/api/billing/create', 'POST', payload);
+        if (res) {
+            showToast('Bill created successfully!');
+            closeModal('checkoutModal');
+            cancelBill(); // resets cart
+            loadDashboardStats(); // refresh stats
+            switchTab('bills'); // switch to bills history
+        }
+    }
+
+    // --- Bills & Payments ---
     async function loadBills() {
         const data = await api('/api/billing/all');
         if (!data) return;
-        document.getElementById('statBills').textContent = data.count;
-
-        document.getElementById('billsTable').innerHTML = data.bills.map(b => `
+        const tbody = document.getElementById('billsTableBody');
+        tbody.innerHTML = data.bills.map(b => `
             <tr>
                 <td>#${b.id}</td>
-                <td>${customerMap[b.customer_id] || b.customer_id}</td>
-                <td>${b.bill_type === 'credit'
-                    ? '<span class="badge badge-warning">Credit</span>'
-                    : '<span class="badge badge-primary">Instant</span>'}</td>
-                <td><strong>₹${b.total_amount.toFixed(2)}</strong></td>
-                <td>${b.is_paid
-                    ? '<span class="badge badge-success">Paid</span>'
-                    : '<span class="badge badge-danger">Unpaid</span>'}</td>
-                <td class="text-dim">${new Date(b.created_at).toLocaleDateString('en-IN')}</td>
+                <td>${new Date(b.created_at).toLocaleDateString()}</td>
+                <td><span class="badge ${b.bill_type==='credit'?'badge-warning':'badge-success'}">${b.bill_type.toUpperCase()}</span></td>
+                <td>${b.customer_name || 'Reg. Customer ' + (b.customer_id||'')}</td>
+                <td>₹${b.final_amount.toFixed(2)}</td>
+                <td><span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span></td>
+                <td><button class="btn btn-sm btn-primary" onclick="viewBill(${b.id})">View</button></td>
             </tr>
         `).join('');
     }
 
-    // ─── PAYMENTS ───
-    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const body = {
-            customer_id: parseInt(document.getElementById('payCustomer').value),
-            amount: parseFloat(document.getElementById('payAmount').value),
-            payment_mode: document.getElementById('payMode').value,
-            note: document.getElementById('payNote').value,
-        };
-        const data = await api('/api/payments/record', 'POST', body);
-        if (data) {
-            showToast(`Payment of ₹${data.payment.amount} recorded`);
-            document.getElementById('paymentForm').reset();
-            loadPayments();
+    async function viewBill(id) {
+        const data = await api(`/api/billing/${id}`);
+        if (!data || !data.bill) return;
+        
+        const b = data.bill;
+        document.getElementById('receiptTitle').innerText = `Receipt #${b.id}`;
+        document.getElementById('receiptDetails').innerHTML = `
+            <strong>Date:</strong> ${new Date(b.created_at).toLocaleString()}<br>
+            <strong>Customer:</strong> ${b.customer_name || (b.customer_id ? 'ID: ' + b.customer_id : 'Instant Walk-in')}<br>
+            <strong>Type:</strong> <span class="badge ${b.bill_type==='credit'?'badge-warning':'badge-success'}">${b.bill_type.toUpperCase()}</span> 
+            <strong>Status:</strong> <span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span>
+        `;
+        
+        const tbody = document.getElementById('receiptItems');
+        if (b.items && b.items.length > 0) {
+            tbody.innerHTML = b.items.map(i => {
+                const prod = allProducts.find(p => p.id === i.product_id);
+                const name = prod ? prod.name : `Product #${i.product_id}`;
+                return `<tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 0.6rem 0;">${name}</td>
+                    <td style="padding: 0.6rem 0;">${i.quantity}</td>
+                    <td style="padding: 0.6rem 0;">₹${i.price_per_unit.toFixed(2)}</td>
+                    <td style="padding: 0.6rem 0; font-weight: 600;">₹${i.subtotal.toFixed(2)}</td>
+                </tr>`;
+            }).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 1rem;">No items</td></tr>';
         }
-    });
+        
+        document.getElementById('receiptTotal').innerText = `₹${b.final_amount.toFixed(2)}`;
+        openModal('receiptModal');
+    }
 
     async function loadPayments() {
         const data = await api('/api/payments/all');
         if (!data) return;
-
-        document.getElementById('paymentsTable').innerHTML = data.payments.map(p => `
+        const tbody = document.getElementById('paymentsTableBody');
+        tbody.innerHTML = data.payments.map(p => `
             <tr>
                 <td>#${p.id}</td>
-                <td>${customerMap[p.customer_id] || p.customer_id}</td>
-                <td><strong>₹${p.amount.toFixed(2)}</strong></td>
-                <td><span class="badge badge-primary">${p.payment_mode.toUpperCase()}</span></td>
-                <td class="text-dim">${p.note || '—'}</td>
-                <td class="text-dim">${new Date(p.created_at).toLocaleDateString('en-IN')}</td>
+                <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                <td>${p.customer_id ? ('Customer ID: ' + p.customer_id) : 'Instant Walk-in'}</td>
+                <td class="text-success font-weight-bold">₹${p.amount.toFixed(2)}</td>
+                <td>${p.payment_mode.toUpperCase()}</td>
+                <td>${p.note || '-'}</td>
             </tr>
         `).join('');
     }
 
-    // ─── CREDIT SUMMARY ───
-    async function loadCreditSummary() {
-        const tbody = document.getElementById('creditTable');
-        tbody.innerHTML = '';
+    async function openRecordPaymentModal() {
+        if (allCustomers.length === 0) {
+            const data = await api('/api/billing/customers');
+            if (data) allCustomers = data.customers;
+        }
+        const sel = document.getElementById('payCustomerSelect');
+        sel.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
+        document.getElementById('payAmount').value = '';
+        document.getElementById('payNote').value = '';
+        openModal('recordPaymentModal');
+    }
 
-        for (const cust of allCustomers) {
-            const data = await api(`/api/customer/due/${cust.id}`);
-            if (!data) continue;
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${cust.name}</strong></td>
-                    <td>${cust.phone}</td>
-                    <td>₹${data.credit_total.toFixed(2)}</td>
-                    <td class="text-success">₹${data.paid_total.toFixed(2)}</td>
-                    <td class="${data.total_due > 0 ? 'text-danger' : 'text-success'}"><strong>₹${data.total_due.toFixed(2)}</strong></td>
-                    <td>${data.total_due > 0
-                        ? '<span class="badge badge-danger">Due</span>'
-                        : '<span class="badge badge-success">Clear</span>'}</td>
-                </tr>
-            `;
+    async function submitRecordPayment() {
+        const payload = {
+            customer_id: document.getElementById('payCustomerSelect').value,
+            amount: parseFloat(document.getElementById('payAmount').value),
+            payment_mode: document.getElementById('payMode').value,
+            note: document.getElementById('payNote').value
+        };
+        if (!payload.amount || payload.amount <= 0) return showToast('Enter valid amount', 'error');
+        
+        const res = await api('/api/payments/record', 'POST', payload);
+        if (res) {
+            showToast('Payment recorded!');
+            closeModal('recordPaymentModal');
+            loadPayments();
+            loadDashboardStats();
         }
     }
+
+    // --- Customers ---
+    async function loadCustomersView() {
+        const data = await api('/api/billing/customers');
+        if (!data) return;
+        allCustomers = data.customers;
+        const list = document.getElementById('customersList');
+        list.innerHTML = allCustomers.map(c => `
+            <div class="customer-list-item" onclick="viewCustomer(${c.id})">
+                <div>
+                    <div style="font-weight: 600; font-size: 1.1rem;">${c.name}</div>
+                    <div class="text-dim">${c.phone}</div>
+                </div>
+                <div>👉 View Analytics</div>
+            </div>
+        `).join('');
+    }
+
+    async function viewCustomer(id) {
+        document.getElementById('customerModalTitle').innerText = 'Loading...';
+        openModal('customerModal');
+        
+        // Fetch specific customer details + bills
+        const billsData = await api(`/api/billing/customer/${id}`);
+        const c = allCustomers.find(x => x.id === id);
+        
+        document.getElementById('customerModalTitle').innerText = c.name + "'s Analytics";
+        
+        if (billsData) {
+            let totalSpent = 0;
+            let totalDue = 0;
+            billsData.bills.forEach(b => {
+                if (b.status === 'paid') totalSpent += b.final_amount;
+                else totalDue += b.final_amount;
+            });
+            
+            document.getElementById('custTotalSpent').innerText = `₹${totalSpent.toFixed(2)}`;
+            document.getElementById('custDue').innerText = `₹${totalDue.toFixed(2)}`;
+            
+            document.getElementById('customerBillsBody').innerHTML = billsData.bills.map(b => `
+                <tr>
+                    <td>${new Date(b.created_at).toLocaleDateString()}</td>
+                    <td>₹${b.final_amount.toFixed(2)}</td>
+                    <td><span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Fetch payments
+        const paymentsData = await api(`/api/payments/customer/${id}`);
+        if (paymentsData && paymentsData.payments) {
+            document.getElementById('customerPaymentsBody').innerHTML = paymentsData.payments.map(p => `
+                <tr>
+                    <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                    <td class="text-success">₹${p.amount.toFixed(2)}</td>
+                    <td>${p.payment_mode.toUpperCase()}</td>
+                </tr>
+            `).join('');
+        } else {
+            document.getElementById('customerPaymentsBody').innerHTML = '<tr><td colspan="3" class="text-center">No payments found</td></tr>';
+        }
+    }
+
+    // Init
+    window.onload = () => { loadDashboardStats(); };
 </script>
 {% endblock %}

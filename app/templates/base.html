@@ -9,19 +9,22 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* ─── Toastify CSS ─── */
+        @import url('https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css');
+
         :root {
-            --bg: #0f1117;
-            --surface: #1a1d27;
-            --surface2: #242836;
-            --border: #2e3348;
-            --text: #e4e6f0;
-            --text-dim: #8b8fa3;
-            --primary: #6c5ce7;
-            --primary-light: #a29bfe;
-            --success: #00cec9;
-            --danger: #ff6b6b;
-            --warning: #ffc048;
-            --accent: #fd79a8;
+            --bg: #f4f6f8;
+            --surface: #ffffff;
+            --surface2: #f1f3f5;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-dim: #64748b;
+            --primary: #0ea5e9;
+            --primary-light: #38bdf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --accent: #8b5cf6;
             --radius: 12px;
         }
 
@@ -50,6 +53,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .navbar .user-info {
@@ -109,6 +113,7 @@
             font-weight: 700;
             background: linear-gradient(135deg, var(--primary), var(--success));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .stat-card .stat-label { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.3rem; }
@@ -228,27 +233,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* ─── Toast ─── */
-        .toast-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .toast {
-            padding: 0.8rem 1.2rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            animation: slideIn 0.3s ease;
-            min-width: 280px;
-        }
-        .toast-success { background: rgba(0,206,201,0.9); color: var(--bg); }
-        .toast-error { background: rgba(255,107,107,0.9); color: white; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* ─── Custom Styles ─── */
 
         /* ─── Auth Pages ─── */
         .auth-wrapper {
@@ -272,6 +257,7 @@
             font-size: 1.5rem;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .auth-card .subtitle {
@@ -329,28 +315,39 @@
     </style>
 </head>
 <body>
-    <div class="toast-container" id="toastContainer"></div>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     {% block content %}{% endblock %}
-
     <script>
         // ─── Toast Notifications ───
         function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "bottom",
+                position: "right",
+                style: {
+                    background: type === 'success' ? "var(--success)" : "var(--danger)",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+                }
+            }).showToast();
         }
 
         // ─── Fetch Helper ───
-        async function api(url, method = 'GET', body = null) {
+        async function api(url, method = 'GET', body = null, suppressToast = false) {
             const options = { method, headers: { 'Content-Type': 'application/json' } };
             if (body) options.body = JSON.stringify(body);
             const res = await fetch(url, options);
             const data = await res.json();
             if (!res.ok) {
-                showToast(data.error || 'Something went wrong', 'error');
+                if (res.status === 401 || res.status === 403) {
+                    showToast(data.error || 'Access Denied. Please login again.', 'error');
+                    setTimeout(() => { window.location.href = '/login'; }, 2000);
+                    return null;
+                }
+                if (!suppressToast) {
+                    showToast(data.error || 'Something went wrong', 'error');
+                }
                 return null;
             }
             return data;
