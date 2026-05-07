@@ -32,7 +32,8 @@ def create_app():
     # Logging
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    # Optional: Enable CORS
+    # Optional: Enable CORS (requires pip install flask-cors)
+
     try:
         from flask_cors import CORS
         CORS(app)
@@ -42,7 +43,10 @@ def create_app():
     # Global JSON Error Handler
     @app.errorhandler(Exception)
     def handle_exception(e):
+        # Always return JSON to prevent frontend parsing errors
         app.logger.error(f"Server Error: {e}")
+        # If it's a known HTTP error, extract its code, else default to 500
+
         code = 500
         if hasattr(e, "code"):
             code = e.code
@@ -62,6 +66,7 @@ def create_app():
     app.register_blueprint(pages_bp)
     app.register_blueprint(ml_bp, url_prefix="/api/ml")
     app.register_blueprint(agent_bp, url_prefix="/api/agent")
+
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(inventory_bp, url_prefix="/api/inventory")
     app.register_blueprint(billing_bp, url_prefix="/api/billing")
