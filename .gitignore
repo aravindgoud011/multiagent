@@ -1,4 +1,12 @@
+# Created by pytest automatically.
+*
 .venv/
-venv/
+app/.venv/
 __pycache__/
 *.pyc
+.env
+node_modules/
+dist/
+build/
+.vscode/
+.idea/
