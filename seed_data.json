@@ -1,0 +1,833 @@
+{
+    "users": [
+        {
+            "id": 1,
+            "name": "admin",
+            "phone": "9876543210",
+            "password_hash": "scrypt:32768:8:1$zAoQy3lUWs4ZlCKf$ca0663dfc028a2b2f4746234c230249c8092c88ce9851dfd4973297d28db39d96b73a6df469acf4beb12475494c5aeda824baa49173828c66a87c131925a7dfe",
+            "role": "admin",
+            "status": "approved",
+            "created_at": "2026-05-06T04:42:11.790000",
+            "loyalty_points": null
+        },
+        {
+            "id": 2,
+            "name": "rishi",
+            "phone": "1234567890",
+            "password_hash": "scrypt:32768:8:1$nunYVsBdBDtEh0kt$66a654ad70464d66520d8fcb4330169b475f15507415d9addb3696ac5da3c925e86464e9fc2d377fd6774e56ded0065279c63d0de0f850ff9b87a4ae57de7f0d",
+            "role": "customer",
+            "status": "approved",
+            "created_at": "2026-05-06T04:44:45.877000",
+            "loyalty_points": null
+        },
+        {
+            "id": 3,
+            "name": "ravi",
+            "phone": "9090909090",
+            "password_hash": "scrypt:32768:8:1$sxFDKPPiB2F4nhlX$56de66397a07d68fa8ca5b2cc31f82996bca3b3476e32e839adccc5ed334cab20ff2933c391a6502d9dcc974c9315202153da0c4d32992633513990361dd63b4",
+            "role": "customer",
+            "status": "approved",
+            "created_at": "2026-05-06T08:00:22.353000",
+            "loyalty_points": null
+        }
+    ],
+    "product": [
+        {
+            "id": 1,
+            "name": "Wheat 5Kg",
+            "category": "Groceries",
+            "price": 260.0,
+            "stock": 19,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/aashirvaad-whole-wheat-atta-5-kg-quick-pantry.jpg",
+            "created_at": "2026-05-06T04:43:11.370000",
+            "updated_at": "2026-05-06T05:38:23.410000"
+        },
+        {
+            "id": 2,
+            "name": "Milk",
+            "category": "Dairy",
+            "price": 10.0,
+            "stock": 48,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/51sQdNeWy5L.jpg",
+            "created_at": "2026-05-06T05:51:23.063000",
+            "updated_at": "2026-05-06T05:51:23.063000"
+        },
+        {
+            "id": 3,
+            "name": "Milk-500ml",
+            "category": "Dairy",
+            "price": 35.0,
+            "stock": 24,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/51sQdNeWy5L.jpg",
+            "created_at": "2026-05-06T05:52:19.510000",
+            "updated_at": "2026-05-06T05:52:31.893000"
+        },
+        {
+            "id": 4,
+            "name": "Milk-litre",
+            "category": "Dairy",
+            "price": 65.0,
+            "stock": 24,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/51sQdNeWy5L.jpg",
+            "created_at": "2026-05-06T05:53:22.303000",
+            "updated_at": "2026-05-06T05:53:22.303000"
+        },
+        {
+            "id": 5,
+            "name": "panner",
+            "category": "Dairy",
+            "price": 120.0,
+            "stock": 11,
+            "low_stock_threshold": 4,
+            "unit": "pcs",
+            "image_url": "/static/uploads/270293-1.avif",
+            "created_at": "2026-05-06T05:56:55.623000",
+            "updated_at": "2026-05-06T05:56:55.623000"
+        },
+        {
+            "id": 6,
+            "name": "Curd-200g",
+            "category": "Dairy",
+            "price": 15.0,
+            "stock": 40,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/shopping.webp",
+            "created_at": "2026-05-06T05:59:39.760000",
+            "updated_at": "2026-05-06T05:59:39.760000"
+        },
+        {
+            "id": 7,
+            "name": "Curd-500g",
+            "category": "Dairy",
+            "price": 35.0,
+            "stock": 19,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/shopping.webp",
+            "created_at": "2026-05-06T06:00:17.917000",
+            "updated_at": "2026-05-06T06:00:17.917000"
+        },
+        {
+            "id": 8,
+            "name": "potato",
+            "category": "Vegetables",
+            "price": 40.0,
+            "stock": 30,
+            "low_stock_threshold": 10,
+            "unit": "kg",
+            "image_url": "/static/uploads/41QKCkQ2A5L.jpg",
+            "created_at": "2026-05-06T06:01:21.440000",
+            "updated_at": "2026-05-06T06:01:21.440000"
+        },
+        {
+            "id": 9,
+            "name": "Onion",
+            "category": "Vegetables",
+            "price": 35.0,
+            "stock": 29,
+            "low_stock_threshold": 10,
+            "unit": "kg",
+            "image_url": "/static/uploads/onion.jpg",
+            "created_at": "2026-05-06T06:02:18.850000",
+            "updated_at": "2026-05-06T06:02:18.850000"
+        },
+        {
+            "id": 10,
+            "name": "greenchilli-100g",
+            "category": "Vegetables",
+            "price": 10.0,
+            "stock": 18,
+            "low_stock_threshold": 5,
+            "unit": "2kg",
+            "image_url": "/static/uploads/greenchilli.jpg",
+            "created_at": "2026-05-06T06:09:36.970000",
+            "updated_at": "2026-05-06T06:09:36.970000"
+        },
+        {
+            "id": 11,
+            "name": "garlic100g",
+            "category": "Vegetables",
+            "price": 20.0,
+            "stock": 8,
+            "low_stock_threshold": 5,
+            "unit": "1kg",
+            "image_url": "/static/uploads/71vpJSiNYeL._AC_UF8941000_QL80_.jpg",
+            "created_at": "2026-05-06T06:10:55.233000",
+            "updated_at": "2026-05-06T06:10:55.233000"
+        },
+        {
+            "id": 12,
+            "name": "ginger100g",
+            "category": "Vegetables",
+            "price": 30.0,
+            "stock": 9,
+            "low_stock_threshold": 5,
+            "unit": "1kg",
+            "image_url": "/static/uploads/ginger.webp",
+            "created_at": "2026-05-06T06:12:41.600000",
+            "updated_at": "2026-05-06T06:12:41.600000"
+        },
+        {
+            "id": 13,
+            "name": "Redchilli-50g",
+            "category": "Vegetables",
+            "price": 10.0,
+            "stock": 19,
+            "low_stock_threshold": 10,
+            "unit": "1kg",
+            "image_url": "/static/uploads/redchilli.jpg",
+            "created_at": "2026-05-06T06:13:34.530000",
+            "updated_at": "2026-05-06T06:13:34.530000"
+        },
+        {
+            "id": 14,
+            "name": "Oil 1kg",
+            "category": "Groceries",
+            "price": 200.0,
+            "stock": 23,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/goldrop.jpg",
+            "created_at": "2026-05-06T06:19:48.093000",
+            "updated_at": "2026-05-06T06:19:48.093000"
+        },
+        {
+            "id": 15,
+            "name": "Oil 15kg tin",
+            "category": "Groceries",
+            "price": 2900.0,
+            "stock": 3,
+            "low_stock_threshold": 1,
+            "unit": "pcs",
+            "image_url": "/static/uploads/goldrop15.jpg",
+            "created_at": "2026-05-06T06:21:31.273000",
+            "updated_at": "2026-05-06T06:21:31.273000"
+        },
+        {
+            "id": 16,
+            "name": "Oil 3kg",
+            "category": "Groceries",
+            "price": 450.0,
+            "stock": 23,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/3kg.webp",
+            "created_at": "2026-05-06T06:23:12.867000",
+            "updated_at": "2026-05-06T06:23:12.867000"
+        },
+        {
+            "id": 17,
+            "name": "Oil 5kg",
+            "category": "Groceries",
+            "price": 780.0,
+            "stock": 22,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/3kg.webp",
+            "created_at": "2026-05-06T06:23:42.117000",
+            "updated_at": "2026-05-06T06:23:42.117000"
+        },
+        {
+            "id": 18,
+            "name": "Sugar",
+            "category": "Groceries",
+            "price": 50.0,
+            "stock": 99,
+            "low_stock_threshold": 25,
+            "unit": "kg",
+            "image_url": "/static/uploads/sugar.jpg",
+            "created_at": "2026-05-06T06:24:52.977000",
+            "updated_at": "2026-05-06T06:24:52.977000"
+        },
+        {
+            "id": 19,
+            "name": "Rice 26kg",
+            "category": "Groceries",
+            "price": 1500.0,
+            "stock": 27,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/download.jpg",
+            "created_at": "2026-05-06T06:25:56.923000",
+            "updated_at": "2026-05-06T06:25:56.923000"
+        },
+        {
+            "id": 20,
+            "name": "Chilli powder 50g",
+            "category": "Groceries",
+            "price": 25.0,
+            "stock": 22,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/kashmiri-chill-powder-500x500_grande.jpg",
+            "created_at": "2026-05-06T06:28:31.240000",
+            "updated_at": "2026-05-06T06:29:24.247000"
+        },
+        {
+            "id": 21,
+            "name": "Chilli powder 100g",
+            "category": "Groceries",
+            "price": 50.0,
+            "stock": 23,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/kashmiri-chill-powder-500x500_grande.jpg",
+            "created_at": "2026-05-06T06:29:17.990000",
+            "updated_at": "2026-05-06T06:29:17.990000"
+        },
+        {
+            "id": 22,
+            "name": "Chilli powder 500g",
+            "category": "Groceries",
+            "price": 210.0,
+            "stock": 11,
+            "low_stock_threshold": 6,
+            "unit": "pcs",
+            "image_url": "/static/uploads/kashmiri-chill-powder-500x500_grande.jpg",
+            "created_at": "2026-05-06T06:30:15.990000",
+            "updated_at": "2026-05-06T06:30:15.990000"
+        },
+        {
+            "id": 23,
+            "name": "Salt-kg",
+            "category": "Groceries",
+            "price": 20.0,
+            "stock": 47,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/salt.webp",
+            "created_at": "2026-05-06T06:31:38.683000",
+            "updated_at": "2026-05-06T06:31:38.683000"
+        },
+        {
+            "id": 24,
+            "name": "GaramMasala",
+            "category": "Groceries",
+            "price": 10.0,
+            "stock": 23,
+            "low_stock_threshold": 10,
+            "unit": "pcs",
+            "image_url": "/static/uploads/garam.jpg",
+            "created_at": "2026-05-06T06:44:41.657000",
+            "updated_at": "2026-05-06T06:44:41.657000"
+        },
+        {
+            "id": 25,
+            "name": "Eggs",
+            "category": "Dairy",
+            "price": 6.0,
+            "stock": 320,
+            "low_stock_threshold": 60,
+            "unit": "pcs",
+            "image_url": "/static/uploads/eggs.jpg",
+            "created_at": "2026-05-06T13:41:44.127000",
+            "updated_at": "2026-05-06T13:41:44.127000"
+        },
+        {
+            "id": 26,
+            "name": "Coca-Cola 500ml",
+            "category": "Beverages",
+            "price": 40.0,
+            "stock": 50,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/coca_cola_500ml_1778076007119.png",
+            "created_at": "2026-05-06T14:06:51.987000",
+            "updated_at": "2026-05-06T14:06:51.987000"
+        },
+        {
+            "id": 27,
+            "name": "Nescafe Classic 50g",
+            "category": "Beverages",
+            "price": 180.0,
+            "stock": 20,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/nescafe_coffee_jar_1778076092413.png",
+            "created_at": "2026-05-06T14:06:52.090000",
+            "updated_at": "2026-05-06T14:06:52.090000"
+        },
+        {
+            "id": 28,
+            "name": "Tata Tea 250g",
+            "category": "Beverages",
+            "price": 110.0,
+            "stock": 30,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/tata_tea_pack_1778076192088.png",
+            "created_at": "2026-05-06T14:06:52.190000",
+            "updated_at": "2026-05-06T14:06:52.190000"
+        },
+        {
+            "id": 29,
+            "name": "Lay's Classic",
+            "category": "Snacks",
+            "price": 20.0,
+            "stock": 100,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/lays_chips_classic_1778076026582.png",
+            "created_at": "2026-05-06T14:06:52.297000",
+            "updated_at": "2026-05-06T14:06:52.297000"
+        },
+        {
+            "id": 30,
+            "name": "Kurkure Masala",
+            "category": "Snacks",
+            "price": 20.0,
+            "stock": 80,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/kurkure_snacks_pack_1778076218212.png",
+            "created_at": "2026-05-06T14:06:52.403000",
+            "updated_at": "2026-05-06T14:06:52.403000"
+        },
+        {
+            "id": 31,
+            "name": "Maggi Noodles",
+            "category": "Snacks",
+            "price": 14.0,
+            "stock": 150,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/maggi_noodles_pack_1778076114360.png",
+            "created_at": "2026-05-06T14:06:52.533000",
+            "updated_at": "2026-05-06T14:06:52.533000"
+        },
+        {
+            "id": 32,
+            "name": "Dove Soap 100g",
+            "category": "Personal Care",
+            "price": 55.0,
+            "stock": 40,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/dove_soap_bar_1778076047189.png",
+            "created_at": "2026-05-06T14:06:52.640000",
+            "updated_at": "2026-05-06T14:06:52.640000"
+        },
+        {
+            "id": 33,
+            "name": "Colgate 150g",
+            "category": "Personal Care",
+            "price": 95.0,
+            "stock": 35,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/colgate_toothpaste_1778076136879.png",
+            "created_at": "2026-05-06T14:06:52.770000",
+            "updated_at": "2026-05-06T14:06:52.770000"
+        },
+        {
+            "id": 34,
+            "name": "Dettol Handwash",
+            "category": "Personal Care",
+            "price": 85.0,
+            "stock": 25,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/dettol_handwash_bottle_1778076240062.png",
+            "created_at": "2026-05-06T14:06:52.873000",
+            "updated_at": "2026-05-06T14:06:52.873000"
+        },
+        {
+            "id": 35,
+            "name": "Vim Liquid 500ml",
+            "category": "Household",
+            "price": 105.0,
+            "stock": 20,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/vim_dishwash_liquid_1778076155178.png",
+            "created_at": "2026-05-06T14:06:52.977000",
+            "updated_at": "2026-05-06T14:06:52.977000"
+        },
+        {
+            "id": 36,
+            "name": "Surf Excel 1kg",
+            "category": "Household",
+            "price": 140.0,
+            "stock": 15,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/surf_excel_detergent_1778076071750.png",
+            "created_at": "2026-05-06T14:06:53.077000",
+            "updated_at": "2026-05-06T14:06:53.077000"
+        },
+        {
+            "id": 37,
+            "name": "Harpic 500ml",
+            "category": "Household",
+            "price": 90.0,
+            "stock": 12,
+            "low_stock_threshold": 5,
+            "unit": "pcs",
+            "image_url": "/static/uploads/harpic_cleaner_bottle_1778076265482.png",
+            "created_at": "2026-05-06T14:06:53.190000",
+            "updated_at": "2026-05-06T14:06:53.190000"
+        }
+    ],
+    "bill": [
+        {
+            "id": 1,
+            "customer_id": null,
+            "customer_name": "aravind",
+            "bill_type": "instant",
+            "total_amount": 450.0,
+            "discount": 0.0,
+            "final_amount": 450.0,
+            "status": "paid",
+            "created_at": "2026-05-06T06:32:34.473000"
+        },
+        {
+            "id": 2,
+            "customer_id": 2,
+            "customer_name": null,
+            "bill_type": "credit",
+            "total_amount": 4680.0,
+            "discount": 0.0,
+            "final_amount": 4680.0,
+            "status": "paid",
+            "created_at": "2026-05-06T06:34:06.573000"
+        },
+        {
+            "id": 3,
+            "customer_id": 2,
+            "customer_name": null,
+            "bill_type": "credit",
+            "total_amount": 65.0,
+            "discount": 0.0,
+            "final_amount": 65.0,
+            "status": "paid",
+            "created_at": "2026-05-06T06:40:14.453000"
+        },
+        {
+            "id": 4,
+            "customer_id": null,
+            "customer_name": "aravind",
+            "bill_type": "instant",
+            "total_amount": 75.0,
+            "discount": 0.0,
+            "final_amount": 75.0,
+            "status": "paid",
+            "created_at": "2026-05-06T06:45:17.240000"
+        },
+        {
+            "id": 5,
+            "customer_id": 2,
+            "customer_name": null,
+            "bill_type": "credit",
+            "total_amount": 4025.0,
+            "discount": 0.0,
+            "final_amount": 4025.0,
+            "status": "paid",
+            "created_at": "2026-05-06T08:19:57.807000"
+        },
+        {
+            "id": 6,
+            "customer_id": 2,
+            "customer_name": null,
+            "bill_type": "credit",
+            "total_amount": 1065.0,
+            "discount": 0.0,
+            "final_amount": 1065.0,
+            "status": "paid",
+            "created_at": "2026-05-06T08:22:28.350000"
+        },
+        {
+            "id": 7,
+            "customer_id": null,
+            "customer_name": "abhi",
+            "bill_type": "instant",
+            "total_amount": 10.0,
+            "discount": 0.0,
+            "final_amount": 10.0,
+            "status": "paid",
+            "created_at": "2026-05-06T13:36:32.793000"
+        },
+        {
+            "id": 8,
+            "customer_id": null,
+            "customer_name": "abhi",
+            "bill_type": "instant",
+            "total_amount": 200.0,
+            "discount": 0.0,
+            "final_amount": 200.0,
+            "status": "paid",
+            "created_at": "2026-05-06T13:45:28.003000"
+        }
+    ],
+    "bill_item": [
+        {
+            "id": 1,
+            "bill_id": 1,
+            "product_id": 16,
+            "quantity": 1,
+            "price_per_unit": 450.0,
+            "subtotal": 450.0
+        },
+        {
+            "id": 2,
+            "bill_id": 2,
+            "product_id": 15,
+            "quantity": 1,
+            "price_per_unit": 2900.0,
+            "subtotal": 2900.0
+        },
+        {
+            "id": 3,
+            "bill_id": 2,
+            "product_id": 19,
+            "quantity": 1,
+            "price_per_unit": 1500.0,
+            "subtotal": 1500.0
+        },
+        {
+            "id": 4,
+            "bill_id": 2,
+            "product_id": 1,
+            "quantity": 1,
+            "price_per_unit": 260.0,
+            "subtotal": 260.0
+        },
+        {
+            "id": 5,
+            "bill_id": 2,
+            "product_id": 23,
+            "quantity": 1,
+            "price_per_unit": 20.0,
+            "subtotal": 20.0
+        },
+        {
+            "id": 6,
+            "bill_id": 3,
+            "product_id": 7,
+            "quantity": 1,
+            "price_per_unit": 35.0,
+            "subtotal": 35.0
+        },
+        {
+            "id": 7,
+            "bill_id": 3,
+            "product_id": 11,
+            "quantity": 1,
+            "price_per_unit": 20.0,
+            "subtotal": 20.0
+        },
+        {
+            "id": 8,
+            "bill_id": 3,
+            "product_id": 10,
+            "quantity": 1,
+            "price_per_unit": 10.0,
+            "subtotal": 10.0
+        },
+        {
+            "id": 9,
+            "bill_id": 4,
+            "product_id": 20,
+            "quantity": 1,
+            "price_per_unit": 25.0,
+            "subtotal": 25.0
+        },
+        {
+            "id": 10,
+            "bill_id": 4,
+            "product_id": 18,
+            "quantity": 1,
+            "price_per_unit": 50.0,
+            "subtotal": 50.0
+        },
+        {
+            "id": 11,
+            "bill_id": 5,
+            "product_id": 9,
+            "quantity": 1,
+            "price_per_unit": 35.0,
+            "subtotal": 35.0
+        },
+        {
+            "id": 12,
+            "bill_id": 5,
+            "product_id": 13,
+            "quantity": 1,
+            "price_per_unit": 10.0,
+            "subtotal": 10.0
+        },
+        {
+            "id": 13,
+            "bill_id": 5,
+            "product_id": 11,
+            "quantity": 1,
+            "price_per_unit": 20.0,
+            "subtotal": 20.0
+        },
+        {
+            "id": 14,
+            "bill_id": 5,
+            "product_id": 12,
+            "quantity": 1,
+            "price_per_unit": 30.0,
+            "subtotal": 30.0
+        },
+        {
+            "id": 15,
+            "bill_id": 5,
+            "product_id": 10,
+            "quantity": 1,
+            "price_per_unit": 10.0,
+            "subtotal": 10.0
+        },
+        {
+            "id": 16,
+            "bill_id": 5,
+            "product_id": 2,
+            "quantity": 2,
+            "price_per_unit": 10.0,
+            "subtotal": 20.0
+        },
+        {
+            "id": 17,
+            "bill_id": 5,
+            "product_id": 5,
+            "quantity": 1,
+            "price_per_unit": 120.0,
+            "subtotal": 120.0
+        },
+        {
+            "id": 18,
+            "bill_id": 5,
+            "product_id": 19,
+            "quantity": 2,
+            "price_per_unit": 1500.0,
+            "subtotal": 3000.0
+        },
+        {
+            "id": 19,
+            "bill_id": 5,
+            "product_id": 17,
+            "quantity": 1,
+            "price_per_unit": 780.0,
+            "subtotal": 780.0
+        },
+        {
+            "id": 20,
+            "bill_id": 6,
+            "product_id": 17,
+            "quantity": 1,
+            "price_per_unit": 780.0,
+            "subtotal": 780.0
+        },
+        {
+            "id": 21,
+            "bill_id": 6,
+            "product_id": 20,
+            "quantity": 1,
+            "price_per_unit": 25.0,
+            "subtotal": 25.0
+        },
+        {
+            "id": 22,
+            "bill_id": 6,
+            "product_id": 22,
+            "quantity": 1,
+            "price_per_unit": 210.0,
+            "subtotal": 210.0
+        },
+        {
+            "id": 23,
+            "bill_id": 6,
+            "product_id": 21,
+            "quantity": 1,
+            "price_per_unit": 50.0,
+            "subtotal": 50.0
+        },
+        {
+            "id": 24,
+            "bill_id": 7,
+            "product_id": 24,
+            "quantity": 1,
+            "price_per_unit": 10.0,
+            "subtotal": 10.0
+        },
+        {
+            "id": 25,
+            "bill_id": 8,
+            "product_id": 14,
+            "quantity": 1,
+            "price_per_unit": 200.0,
+            "subtotal": 200.0
+        }
+    ],
+    "payment": [
+        {
+            "id": 1,
+            "customer_id": null,
+            "amount": 75.0,
+            "payment_mode": "cash",
+            "note": "Instant Bill #4",
+            "created_at": "2026-05-06T06:45:17.837000"
+        },
+        {
+            "id": 2,
+            "customer_id": 2,
+            "amount": 4745.0,
+            "payment_mode": "cash",
+            "note": "thankyou",
+            "created_at": "2026-05-06T06:46:39.440000"
+        },
+        {
+            "id": 3,
+            "customer_id": 2,
+            "amount": 4745.0,
+            "payment_mode": "cash",
+            "note": null,
+            "created_at": "2026-05-06T08:15:27.513000"
+        },
+        {
+            "id": 4,
+            "customer_id": 2,
+            "amount": 345.0,
+            "payment_mode": "cash",
+            "note": null,
+            "created_at": "2026-05-06T08:26:05.617000"
+        },
+        {
+            "id": 5,
+            "customer_id": null,
+            "amount": 10.0,
+            "payment_mode": "cash",
+            "note": "Instant Bill #7",
+            "created_at": "2026-05-06T13:36:33.340000"
+        },
+        {
+            "id": 6,
+            "customer_id": null,
+            "amount": 200.0,
+            "payment_mode": "cash",
+            "note": "Instant Bill #8",
+            "created_at": "2026-05-06T13:45:28.670000"
+        }
+    ],
+    "notification": [
+        {
+            "id": 1,
+            "title": "New Registration",
+            "message": "Customer ravi (9090909090) has registered and is pending approval.",
+            "is_read": true,
+            "created_at": "2026-05-06T08:08:09.533000",
+            "user_id": null
+        }
+    ],
+    "support_ticket": []
+}

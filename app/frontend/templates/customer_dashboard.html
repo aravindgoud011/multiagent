@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Portal | Smart Retail{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customer_dashboard.css') }}">
+
+<div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+        <div class="logo">
+            <i class="fas fa-shopping-basket"></i>
+            <span>Smart Retail</span>
+        </div>
+        
+        <div class="nav-right">
+            <div class="notif-bell" onclick="toggleNotifications()">
+                <i class="far fa-bell"></i>
+                <div class="notif-badge" id="notifBadge" style="display: none;">0</div>
+                
+                <div id="notifDropdown" class="card" style="position: absolute; top: 40px; right: 0; width: 300px; display: none; z-index: 2001; padding: 0;">
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--border); font-weight: 700;">Notifications</div>
+                    <div id="notifList" style="max-height: 300px; overflow-y: auto;"></div>
+                    <div style="padding: 0.8rem; text-align: center; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--primary); cursor: pointer;" onclick="customerMarkAllRead()">Mark all as read</div>
+                </div>
+            </div>
+
+            <div class="user-dropdown">
+                <span style="font-weight: 600; font-size: 0.9rem;" id="customerName"></span>
+                <div class="avatar" id="userAvatar">U</div>
+            </div>
+            
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="welcome-header">
+            <h1>Customer Dashboard</h1>
+            <p>Track your bills, dues, and rewards in real-time.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon icon-bills"><i class="fas fa-file-invoice"></i></div>
+                <div class="stat-info">
+                    <h3>Total Bills</h3>
+                    <div class="value" id="stat-bills">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-paid"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <h3>Total Paid</h3>
+                    <div class="value" id="stat-paid">₹0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-due"><i class="fas fa-exclamation-circle"></i></div>
+                <div class="stat-info">
+                    <h3>Pending Due</h3>
+                    <div class="value" id="stat-due">₹0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-points"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <h3>Loyalty Points</h3>
+                    <div class="value" id="stat-points">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Bills Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Bills & Dues</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="text" placeholder="Search bill ID..." style="padding: 0.4rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.8rem;">
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Bill ID</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody id="billsTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Loading bills...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Spending Insights Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Spending Insights</h2>
+                    <span style="font-size: 0.75rem; color: var(--text-dim);">Last 6 Months</span>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="spendingChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Recent Payment Transactions</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Status</th></tr>
+                    </thead>
+                    <tbody id="paymentsTableBody">
+                        <tr><td colspan="4" style="text-align: center;">Loading payments...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Support Section -->
+        <div class="welcome-header" style="margin-top: 3rem;">
+            <h2>Need Assistance?</h2>
+            <p>Our support team is here to help you with any issues.</p>
+        </div>
+        <div class="support-panel">
+            <div class="support-item" onclick="openSupportModal()">
+                <i class="fas fa-ticket-alt"></i>
+                <h4>Raise Support Ticket</h4>
+                <p>Report technical or account issues</p>
+            </div>
+            <div class="support-item" onclick="openBillingModal()">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h4>Report Billing Issue</h4>
+                <p>Incorrect bill or payment not reflecting</p>
+            </div>
+            <div class="support-item" onclick="openContactModal()">
+                <i class="fas fa-phone-alt"></i>
+                <h4>Contact Store</h4>
+                <p>Get the shopkeeper's contact details</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Floating AI Assistant Button -->
+<div class="ai-fab" onclick="toggleChat()" id="aiFab" title="Smart Retail AI Assistant">
+    <i class="fas fa-robot"></i>
+</div>
+
+<!-- Chat Window -->
+<div id="chatWindow" class="chat-window card" style="display: none;">
+    <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <div class="bot-avatar"><i class="fas fa-robot"></i></div>
+            <div>
+                <div style="font-weight: 700; font-size: 0.9rem;">Customer Assistant</div>
+                <div style="font-size: 0.7rem; color: var(--success);">Online</div>
+            </div>
+        </div>
+        <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2rem;">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="msg-bot">
+            Hello! I'm your Smart Retail assistant. How can I help you today? You can ask me about product availability or if the shop is open!
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button class="btn btn-primary btn-sm" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<!-- Support Ticket Modal -->
+<div id="supportModal" class="modal-overlay" onclick="if(event.target == this) closeModal('supportModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Raise Support Ticket</h2>
+            <button class="btn-close" onclick="closeModal('supportModal')">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Issue Title</label>
+            <input type="text" id="ticketTitle" placeholder="Short summary of the issue">
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea id="ticketDesc" rows="4" placeholder="Detailed explanation..."></textarea>
+        </div>
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <button class="btn btn-outline" onclick="closeModal('supportModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitTicket('General')">Submit Ticket</button>
+        </div>
+    </div>
+</div>
+
+<!-- Billing Issue Modal -->
+<div id="billingModal" class="modal-overlay" onclick="if(event.target == this) closeModal('billingModal')">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Report Billing Issue</h2>
+            <button class="btn-close" onclick="closeModal('billingModal')">&times;</button>
+        </div>
+        <div class="form-group">
+            <label>Select Bill</label>
+            <select id="billingBillId" class="form-select">
+                <option value="">-- Select a Bill ID --</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Issue Description</label>
+            <textarea id="billingDesc" rows="4" placeholder="What is wrong with this bill?"></textarea>
+        </div>
+        <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <button class="btn btn-outline" onclick="closeModal('billingModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitTicket('Billing')">Report Issue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Store Modal -->
+<div id="contactModal" class="modal-overlay" onclick="if(event.target == this) closeModal('contactModal')">
+    <div class="modal" style="max-width: 400px; text-align: center;">
+        <i class="fas fa-store" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+        <h2>Contact Shopkeeper</h2>
+        <p style="color: var(--text-dim); margin-bottom: 1.5rem;">For immediate assistance, please call us at:</p>
+        <div style="font-size: 1.5rem; font-weight: 800; color: var(--text); background: var(--surface2); padding: 1rem; border-radius: 8px; border: 1px dashed var(--primary);">
+            +91 9090909090
+        </div>
+        <p style="font-size: 0.8rem; margin-top: 1rem; color: var(--text-dim);">Available from 9:00 AM to 9:00 PM</p>
+        <button class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;" onclick="closeModal('contactModal')">Close</button>
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div id="invoiceModal" class="modal-overlay" onclick="if(event.target == this) closeInvoice()">
+    <div class="modal">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <h2 style="margin:0;">Invoice Details</h2>
+            <button class="btn btn-outline btn-sm" onclick="closeInvoice()">×</button>
+        </div>
+        <div id="invoiceDetails"></div>
+        <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+            <button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+            <button class="btn btn-primary" onclick="showToast('Generating PDF...', 'info')"><i class="fas fa-download"></i> Download PDF</button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/customer_dashboard.js') }}"></script>
+{% endblock %}
