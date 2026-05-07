@@ -1,0 +1,20 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.git
+.gitignore
+.vscode
+.gemini
+tests/
+error_log.txt
+# *.pkl (Allowed for local model support)
+ml/sales_data_6months.csv
+rag/faiss_index/
+!rag/faiss_index/index.faiss
+!rag/faiss_index/index.pkl

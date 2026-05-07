@@ -11,15 +11,18 @@ def get_db_connection():
     password = os.environ.get("AZURE_SQL_PASSWORD")
     db_name = os.environ.get("AZURE_SQL_DBNAME")
     
+    # Use different driver names for Windows vs Linux (Docker)
+    driver = "{ODBC Driver 18 for SQL Server}" if os.name != 'nt' else "{SQL Server}"
+    
     conn_str = (
-        "Driver={SQL Server};"
+        f"Driver={driver};"
         f"Server={server};"
         f"Database={db_name};"
         f"Uid={username};"
         f"Pwd={password};"
         "Encrypt=yes;"
-        "TrustServerCertificate=no;"
-        "Connection Timeout=30;"
+        "TrustServerCertificate=yes;" # Set to yes for dev convenience in docker
+        "Connection Timeout=5;"
     )
     
     conn = pyodbc.connect(conn_str)

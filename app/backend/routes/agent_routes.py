@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, session
 from agents.support_agent import support_agent
+from agents.admin_graph import process_admin_query
 from ..extensions import get_db_connection
 from utils.helpers import admin_required
 import datetime
@@ -15,6 +16,22 @@ def chat():
     
     response = support_agent.process_query(user_query, customer_name)
     return jsonify({"response": response}), 200
+
+@agent_bp.route("/admin/chat", methods=["POST"])
+@admin_required
+def admin_chat():
+    """Endpoint for the admin multi-agent chat."""
+    data = request.json
+    user_query = data.get("query", "")
+    
+    try:
+        response = process_admin_query(user_query)
+        return jsonify({"response": response}), 200
+    except Exception as e:
+        import traceback
+        print(f"Admin Chat Error: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "Failed to process admin query", "details": str(e)}), 500
 
 @agent_bp.route("/shop-status", methods=["GET"])
 def get_status():

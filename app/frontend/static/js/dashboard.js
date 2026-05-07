@@ -841,3 +841,88 @@ async function toggleShopStatus() {
         loadShopStatus();
     }
 }
+
+// Admin Chat Agent Logic
+function toggleFloatingChat() {
+    const window = document.getElementById('floatingChatWindow');
+    window.classList.toggle('active');
+    if (window.classList.contains('active')) {
+        document.getElementById('floatingChatInput').focus();
+    }
+}
+
+async function sendAdminChatMessage() {
+    const input = document.getElementById('adminChatInput');
+    const container = document.getElementById('adminChatMessages');
+    const query = input.value.trim();
+    if (!query) return;
+
+    input.value = '';
+    appendMessage(container, 'user', query);
+    
+    // Add typing placeholder
+    const typingId = 'bot-typing-' + Date.now();
+    appendMessage(container, 'bot', '<span class="typing-dots"><span></span><span></span><span></span></span>', typingId);
+    container.scrollTop = container.scrollHeight;
+
+    const data = await api('/api/agent/admin/chat', 'POST', { query });
+    
+    // Remove typing placeholder
+    document.getElementById(typingId)?.remove();
+
+    if (data && data.response) {
+        appendMessage(container, 'bot', formatMessage(data.response));
+    } else {
+        appendMessage(container, 'bot', 'I encountered an error. Please try again or check your API quota.');
+    }
+    container.scrollTop = container.scrollHeight;
+}
+
+function handleAdminChatKey(e) {
+    if (e.key === 'Enter') sendAdminChatMessage();
+}
+
+async function sendFloatingChatMessage() {
+    const input = document.getElementById('floatingChatInput');
+    const container = document.getElementById('floatingChatMessages');
+    const indicator = document.getElementById('typingIndicator');
+    const query = input.value.trim();
+    if (!query) return;
+
+    input.value = '';
+    appendMessage(container, 'user', query);
+    container.scrollTop = container.scrollHeight;
+
+    indicator.style.display = 'block';
+    const data = await api('/api/agent/admin/chat', 'POST', { query });
+    indicator.style.display = 'none';
+
+    if (data && data.response) {
+        appendMessage(container, 'bot', formatMessage(data.response));
+    } else {
+        appendMessage(container, 'bot', 'Error connecting to agent.');
+    }
+    container.scrollTop = container.scrollHeight;
+}
+
+function handleFloatingChatKey(e) {
+    if (e.key === 'Enter') sendFloatingChatMessage();
+}
+
+function appendMessage(container, role, content, id = null) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `msg ${role}`;
+    if (id) msgDiv.id = id;
+    msgDiv.innerHTML = content;
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function formatMessage(text) {
+    // Basic formatting for lists and bold text
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>')
+        .replace(/- (.*?)(<br>|$)/g, '<li>$1</li>')
+        .replace(/(<li>.*?<\/li>)+/g, '<ul>$&</ul>');
+}

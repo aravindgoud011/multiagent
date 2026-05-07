@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from ml.local_inference import local_inference
+
 class AzureMLService:
     def __init__(self):
         self.endpoint = os.getenv("AZURE_ML_ENDPOINT")
@@ -12,29 +14,26 @@ class AzureMLService:
 
     def predict(self, input_data):
         """
-        Calls the Azure ML Online Endpoint.
-        input_data: list of dicts/lists as required by the model.
+        [LOCAL MODE] Uses the local .pkl model for predictions.
         """
-        if not self.endpoint or not self.api_key:
-            print("Azure ML Endpoint or API Key not found in .env")
-            return None
-
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {self.api_key}'
-        }
-
-        # Use the input_data directly as the payload
-        payload = input_data
-
         try:
-            response = requests.post(self.endpoint, json=payload, headers=headers)
-            print(f"Azure ML Response Status: {response.status_code}")
-            print(f"Azure ML Response Body: {response.text}")
-            response.raise_for_status()
-            return response.json()
+            # Extract data from the standard Azure ML format we were using
+            # {"data": [{"product": name, "stock": s, "price_per_unit": p, ...}]}
+            data = input_data.get("data", [])
+            if not data:
+                return None
+                
+            item = data[0]
+            product_name = item.get("product")
+            stock = item.get("stock")
+            price = item.get("price_per_unit")
+            
+            prediction = local_inference.predict(product_name, stock, price)
+            
+            # Return in a format similar to what we expect
+            return [prediction] if prediction is not None else None
         except Exception as e:
-            print(f"Error calling Azure ML: {e}")
+            print(f"Local ML redirection error: {e}")
             return None
 
 # Singleton instance
