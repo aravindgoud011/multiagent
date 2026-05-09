@@ -991,3 +991,60 @@ input:checked + .slider:before {
 
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* Analytics Tab */
+.analytics-nav {
+    display: flex;
+    gap: 0.5rem;
+    background: var(--surface2);
+    padding: 0.4rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.analytics-btn {
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.analytics-btn i {
+    font-size: 1rem;
+}
+
+.analytics-btn:hover {
+    color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.analytics-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.iframe-container {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    height: calc(100vh - 220px);
+    min-height: 550px;
+    box-shadow: var(--shadow);
+    margin-top: 1rem;
+}
+
+.iframe-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

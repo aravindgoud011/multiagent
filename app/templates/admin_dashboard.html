@@ -33,6 +33,10 @@
                 <i class="fas fa-users"></i>
                 <span>Customers</span>
             </div>
+            <div class="nav-item" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </div>
         </nav>
         <div class="sidebar-footer" style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
             <div class="nav-item" onclick="logout()" style="border-left:none; padding: 0.5rem 0;">
@@ -50,19 +54,21 @@
                 <i class="fas fa-search text-dim"></i>
                 <input type="text" placeholder="Search products, bills...">
             </div>
-            
+
             <div class="topbar-right">
                 <div class="notif-bell" onclick="toggleNotifications(event)">
                     <i class="far fa-bell"></i>
                     <div class="notif-badge" id="notifBadge">0</div>
-                    
+
                     <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
                         <div class="notif-header">
                             <span>Notifications</span>
-                            <span style="font-weight: 400; color: var(--primary); cursor: pointer;" onclick="markAllAsRead()">Mark all as read</span>
+                            <span style="font-weight: 400; color: var(--primary); cursor: pointer;"
+                                onclick="markAllAsRead()">Mark all as read</span>
                         </div>
                         <div id="notifList"></div>
-                        <div class="notif-footer" onclick="switchTab('customers'); toggleNotifications(event);">View all alerts</div>
+                        <div class="notif-footer" onclick="switchTab('customers'); toggleNotifications(event);">View all
+                            alerts</div>
                     </div>
                 </div>
 
@@ -77,11 +83,12 @@
         </header>
 
         <div class="dashboard-container">
-            
+
             <div id="tab-dashboard" class="tab-pane active">
                 <div class="flex-between mb-1">
                     <h2>Dashboard Overview</h2>
-                    <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal()"><i class="fas fa-plus"></i> Record Payment</button>
+                    <button class="btn btn-primary btn-sm" onclick="openRecordPaymentModal()"><i
+                            class="fas fa-plus"></i> Record Payment</button>
                 </div>
                 <div class="stats-grid">
                     <div class="stat-card">
@@ -135,7 +142,14 @@
                         <h3><i class="fas fa-boxes text-primary"></i> Low Stock Alerts</h3>
                         <div class="table-responsive">
                             <table class="custom-table">
-                                <thead><tr><th>Product</th><th>Stock</th><th>Threshold</th><th>Status</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Stock</th>
+                                        <th>Threshold</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
                                 <tbody id="lowStockTableBody"></tbody>
                             </table>
                         </div>
@@ -149,7 +163,8 @@
                 <div class="ml-card">
                     <div class="ml-content">
                         <h3><i class="fas fa-brain"></i> ML Predictions & Insights</h3>
-                        <p>Powered by SmartRetail AI — Predicting high demand products and potential stock shortages.</p>
+                        <p>Powered by SmartRetail AI — Predicting high demand products and potential stock shortages.
+                        </p>
                     </div>
                     <div class="ml-badge">Coming Soon</div>
                 </div>
@@ -160,8 +175,10 @@
                 <div class="flex-between mb-1">
                     <h2>Inventory & POS</h2>
                     <div style="display: flex; gap: 0.8rem;">
-                        <button class="btn btn-success" onclick="openStartBillModal()"><i class="fas fa-file-invoice-dollar"></i> Start New Bill</button>
-                        <button class="btn btn-primary" onclick="openAddProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+                        <button class="btn btn-success" onclick="openStartBillModal()"><i
+                                class="fas fa-file-invoice-dollar"></i> Start New Bill</button>
+                        <button class="btn btn-primary" onclick="openAddProductModal()"><i class="fas fa-plus"></i> Add
+                            Product</button>
                     </div>
                 </div>
                 <div class="category-scroll" id="catFilters">
@@ -177,7 +194,17 @@
                 <h2>Bills History</h2>
                 <div class="card mt-1 table-responsive">
                     <table class="custom-table">
-                        <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Customer</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
                         <tbody id="billsTableBody"></tbody>
                     </table>
                 </div>
@@ -187,11 +214,21 @@
             <div id="tab-payments" class="tab-pane">
                 <div class="flex-between mb-1">
                     <h2>Payment History</h2>
-                    <button class="btn btn-primary" onclick="openRecordPaymentModal()"><i class="fas fa-plus"></i> Record Payment</button>
+                    <button class="btn btn-primary" onclick="openRecordPaymentModal()"><i class="fas fa-plus"></i>
+                        Record Payment</button>
                 </div>
                 <div class="card mt-1 table-responsive">
                     <table class="custom-table">
-                        <thead><tr><th>ID</th><th>Date</th><th>Customer</th><th>Amount</th><th>Mode</th><th>Note</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Mode</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
                         <tbody id="paymentsTableBody"></tbody>
                     </table>
                 </div>
@@ -201,6 +238,48 @@
             <div id="tab-customers" class="tab-pane">
                 <h2>Customers Overview</h2>
                 <div class="mt-1" id="customersList"></div>
+            </div>
+
+            <!-- Analytics Tab (PowerBI) -->
+            <div id="tab-analytics" class="tab-pane">
+                <div class="flex-between mb-1">
+                    <h2>PowerBI Analytics</h2>
+                    <div class="analytics-nav">
+                        <button class="analytics-btn active" onclick="switchAnalyticsDashboard('sales', this)">
+                            <i class="fas fa-sack-dollar"></i> Sales Dashboard
+                        </button>
+                        <button class="analytics-btn" onclick="switchAnalyticsDashboard('inventory', this)">
+                            <i class="fas fa-warehouse"></i> Inventory Dashboard
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="iframe-container">
+                    <iframe id="powerbi-frame" title="PowerBI Analytics" 
+                        src="https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0" 
+                        frameborder="0" allowFullScreen="true"></iframe>
+                </div>
+            </div>
+
+            <!-- Analytics Tab (PowerBI) -->
+            <div id="tab-analytics" class="tab-pane">
+                <div class="flex-between mb-1">
+                    <h2>PowerBI Analytics</h2>
+                    <div class="analytics-nav">
+                        <button class="analytics-btn active" onclick="switchAnalyticsDashboard('sales', this)">
+                            <i class="fas fa-sack-dollar"></i> Sales Dashboard
+                        </button>
+                        <button class="analytics-btn" onclick="switchAnalyticsDashboard('inventory', this)">
+                            <i class="fas fa-warehouse"></i> Inventory Dashboard
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="iframe-container">
+                    <iframe id="powerbi-frame" title="PowerBI Analytics" 
+                        src="https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0" 
+                        frameborder="0" allowFullScreen="true"></iframe>
+                </div>
             </div>
 
         </div>
@@ -237,7 +316,8 @@
 <div class="cart-overlay" id="cartOverlay">
     <div class="cart-header">
         <h3>Current Bill (<span id="cartTypeBadge"></span>)</h3>
-        <button class="btn-sm" style="border:none;background:transparent;cursor:pointer;" onclick="cancelBill()">❌</button>
+        <button class="btn-sm" style="border:none;background:transparent;cursor:pointer;"
+            onclick="cancelBill()">❌</button>
     </div>
     <div style="padding: 0.5rem 1.5rem; background: var(--surface2); font-size:0.85rem;" id="cartCustomerInfo"></div>
     <div class="cart-items" id="cartItemsList"></div>
@@ -246,7 +326,8 @@
             <strong>Total Amount:</strong>
             <strong id="cartTotal" class="text-success" style="font-size:1.2rem;">₹0</strong>
         </div>
-        <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="proceedToCheckout()">Checkout</button>
+        <button class="btn btn-primary" style="width:100%; justify-content:center;"
+            onclick="proceedToCheckout()">Checkout</button>
     </div>
 </div>
 
@@ -331,8 +412,14 @@
     <div class="modal" style="max-width: 600px;">
         <h2 id="customerModalTitle">Customer Details</h2>
         <div class="stats-grid mb-1">
-            <div class="stat-card" style="padding: 1rem;"><div class="stat-value" id="custTotalSpent" style="font-size:1.5rem;">₹0</div><div class="stat-label">Total Spent</div></div>
-            <div class="stat-card" style="padding: 1rem;"><div class="stat-value text-warning" id="custDue" style="font-size:1.5rem;">₹0</div><div class="stat-label">Pending Due</div></div>
+            <div class="stat-card" style="padding: 1rem;">
+                <div class="stat-value" id="custTotalSpent" style="font-size:1.5rem;">₹0</div>
+                <div class="stat-label">Total Spent</div>
+            </div>
+            <div class="stat-card" style="padding: 1rem;">
+                <div class="stat-value text-warning" id="custDue" style="font-size:1.5rem;">₹0</div>
+                <div class="stat-label">Pending Due</div>
+            </div>
             <div id="approvalSection" class="stat-card" style="padding: 1rem; display: none;">
                 <div class="badge badge-warning mb-1">PENDING APPROVAL</div>
                 <button class="btn btn-success btn-sm" onclick="approveCustomer()">Approve Now</button>
@@ -341,14 +428,26 @@
         <h3>Recent Bills</h3>
         <div class="card mt-1" style="max-height: 250px; overflow-y:auto;">
             <table>
-                <thead><tr><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
                 <tbody id="customerBillsBody"></tbody>
             </table>
         </div>
         <h3 class="mt-1">Recent Payments</h3>
         <div class="card mt-1" style="max-height: 200px; overflow-y:auto;">
             <table>
-                <thead><tr><th>Date</th><th>Amount</th><th>Mode</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Mode</th>
+                    </tr>
+                </thead>
                 <tbody id="customerPaymentsBody"></tbody>
             </table>
         </div>
@@ -369,7 +468,8 @@
         <div class="form-group">
             <label>Amount (₹)</label>
             <input type="number" id="payAmount" step="0.01" required>
-            <div id="modalDueInfo" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem;">Select a customer to see their current due.</div>
+            <div id="modalDueInfo" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem;">Select a
+                customer to see their current due.</div>
         </div>
         <div class="form-group">
             <label>Payment Mode</label>
@@ -385,7 +485,8 @@
         </div>
         <div class="modal-actions">
             <button type="button" class="btn" onclick="closeModal('recordPaymentModal')">Cancel</button>
-            <button type="button" id="submitPaymentBtn" class="btn btn-primary" onclick="submitRecordPayment()">Save Payment</button>
+            <button type="button" id="submitPaymentBtn" class="btn btn-primary" onclick="submitRecordPayment()">Save
+                Payment</button>
         </div>
     </div>
 </div>
@@ -394,12 +495,22 @@
 <div class="modal-overlay" id="receiptModal">
     <div class="modal">
         <h2 id="receiptTitle">Bill Receipt</h2>
-        <div id="receiptDetails" class="mb-1" style="font-size: 0.9rem; line-height: 1.5; background: var(--surface2); padding: 1rem; border-radius: 8px;"></div>
+        <div id="receiptDetails" class="mb-1"
+            style="font-size: 0.9rem; line-height: 1.5; background: var(--surface2); padding: 1rem; border-radius: 8px;">
+        </div>
         <table style="width:100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.9rem;">
-            <thead><tr style="border-bottom: 2px solid var(--border);"><th style="padding-bottom:0.5rem;">Item</th><th style="padding-bottom:0.5rem;">Qty</th><th style="padding-bottom:0.5rem;">Price</th><th style="padding-bottom:0.5rem;">Total</th></tr></thead>
+            <thead>
+                <tr style="border-bottom: 2px solid var(--border);">
+                    <th style="padding-bottom:0.5rem;">Item</th>
+                    <th style="padding-bottom:0.5rem;">Qty</th>
+                    <th style="padding-bottom:0.5rem;">Price</th>
+                    <th style="padding-bottom:0.5rem;">Total</th>
+                </tr>
+            </thead>
             <tbody id="receiptItems"></tbody>
         </table>
-        <div class="flex-between" style="font-weight: bold; font-size: 1.2rem; padding-top: 1rem; border-top: 2px solid var(--border);">
+        <div class="flex-between"
+            style="font-weight: bold; font-size: 1.2rem; padding-top: 1rem; border-top: 2px solid var(--border);">
             <span>Grand Total:</span>
             <span id="receiptTotal" class="text-success">₹0</span>
         </div>

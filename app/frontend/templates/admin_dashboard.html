@@ -33,6 +33,10 @@
                 <i class="fas fa-users"></i>
                 <span>Customers</span>
             </div>
+            <div class="nav-item" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </div>
             <div class="nav-item" onclick="switchTab('issues')">
                 <i class="fas fa-headset"></i>
                 <span>Customer Issues</span>
@@ -174,9 +178,11 @@
                 <div class="ml-card">
                     <div class="ml-content" style="flex:1;">
                         <h3><i class="fas fa-brain text-primary"></i> AI Inventory Predictions</h3>
-                        <p class="text-dim mb-1" style="font-size:0.85rem;">Predicted demand for next 24 hours (Azure ML Forecast Agent).</p>
+                        <p class="text-dim mb-1" style="font-size:0.85rem;">Predicted demand for next 24 hours (Azure ML
+                            Forecast Agent).</p>
                         <div id="mlPredictionsList" class="ml-predictions-container">
-                            <div class="text-dim" style="font-size:0.8rem; padding: 1rem;">Connecting to Forecast Agent...</div>
+                            <div class="text-dim" style="font-size:0.8rem; padding: 1rem;">Connecting to Forecast
+                                Agent...</div>
                         </div>
                     </div>
                     <div class="ml-badge">Live</div>
@@ -257,11 +263,33 @@
                 <div class="mt-1" id="customersList"></div>
             </div>
 
+            <!-- Analytics Tab (PowerBI) -->
+            <div id="tab-analytics" class="tab-pane">
+                <div class="flex-between mb-1">
+                    <h2>PowerBI Analytics</h2>
+                    <div class="analytics-nav">
+                        <button class="analytics-btn active" onclick="switchAnalyticsDashboard('sales', this)">
+                            <i class="fas fa-sack-dollar"></i> Sales Dashboard
+                        </button>
+                        <button class="analytics-btn" onclick="switchAnalyticsDashboard('inventory', this)">
+                            <i class="fas fa-warehouse"></i> Inventory Dashboard
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="iframe-container">
+                    <iframe id="powerbi-frame" title="PowerBI Analytics" 
+                        src="https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0" 
+                        frameborder="0" allowFullScreen="true"></iframe>
+                </div>
+            </div>
+
             <!-- Customer Issues Tab -->
             <div id="tab-issues" class="tab-pane">
                 <div class="flex-between mb-1">
                     <h2>Customer Support & Billing Issues</h2>
-                    <button class="btn btn-outline btn-sm" onclick="loadCustomerIssues()"><i class="fas fa-sync"></i> Refresh</button>
+                    <button class="btn btn-outline btn-sm" onclick="loadCustomerIssues()"><i class="fas fa-sync"></i>
+                        Refresh</button>
                 </div>
                 <div class="card mt-1 table-responsive">
                     <table class="custom-table">
@@ -276,7 +304,9 @@
                             </tr>
                         </thead>
                         <tbody id="issuesTableBody">
-                            <tr><td colspan="6" style="text-align:center;">Loading issues...</td></tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center;">Loading issues...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -288,34 +318,42 @@
                     <h2>Retail Assistant Agent</h2>
                     <p class="text-dim">Your multi-agent AI partner for inventory, sales, and support.</p>
                 </div>
-                
+
                 <div class="admin-chat-container">
                     <div class="chat-header-agent">
                         <div class="agent-avatar"><i class="fas fa-robot"></i></div>
                         <div>
                             <div style="font-weight: 700; font-size: 1rem;">Retail AI Supervisor</div>
-                            <div style="font-size: 0.75rem; color: var(--success); display: flex; align-items: center; gap: 0.3rem;">
-                                <span style="width: 6px; height: 6px; background: var(--success); border-radius: 50%;"></span>
+                            <div
+                                style="font-size: 0.75rem; color: var(--success); display: flex; align-items: center; gap: 0.3rem;">
+                                <span
+                                    style="width: 6px; height: 6px; background: var(--success); border-radius: 50%;"></span>
                                 Online & Ready to Assist
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="chat-messages" id="adminChatMessages">
                         <div class="msg bot">
-                            Hello Administrator! I am your Smart Retail Assistant. I am here to help you manage your shop efficiently. You can ask me about:
+                            Hello Administrator! I am your Smart Retail Assistant. I am here to help you manage your
+                            shop efficiently. You can ask me about:
                             <ul style="margin-top: 0.5rem; padding-left: 1.2rem;">
-                                <li><strong>Inventory</strong>: Stock levels, low stock alerts, and product details.</li>
-                                <li><strong>Sales</strong>: Revenue reports, top-selling products, and payment history.</li>
+                                <li><strong>Inventory</strong>: Stock levels, low stock alerts, and product details.
+                                </li>
+                                <li><strong>Sales</strong>: Revenue reports, top-selling products, and payment history.
+                                </li>
                                 <li><strong>Support</strong>: Customer tickets and pending issues.</li>
                             </ul>
                             How can I assist you right now?
                         </div>
                     </div>
-                    
+
                     <div class="chat-input-area">
-                        <input type="text" id="adminChatInput" placeholder="Ask about sales, stock, or customer issues..." onkeypress="handleAdminChatKey(event)">
-                        <button class="btn btn-primary" onclick="sendAdminChatMessage()"><i class="fas fa-paper-plane"></i></button>
+                        <input type="text" id="adminChatInput"
+                            placeholder="Ask about sales, stock, or customer issues..."
+                            onkeypress="handleAdminChatKey(event)">
+                        <button class="btn btn-primary" onclick="sendAdminChatMessage()"><i
+                                class="fas fa-paper-plane"></i></button>
                     </div>
                 </div>
             </div>
@@ -341,8 +379,10 @@
         <span></span><span></span><span></span>
     </div>
     <div class="chat-input-area" style="padding: 1rem;">
-        <input type="text" id="floatingChatInput" placeholder="Ask anything..." onkeypress="handleFloatingChatKey(event)">
-        <button class="btn btn-primary btn-sm" onclick="sendFloatingChatMessage()"><i class="fas fa-paper-plane"></i></button>
+        <input type="text" id="floatingChatInput" placeholder="Ask anything..."
+            onkeypress="handleFloatingChatKey(event)">
+        <button class="btn btn-primary btn-sm" onclick="sendFloatingChatMessage()"><i
+                class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
@@ -592,7 +632,8 @@
             <h2>Resolve Issue</h2>
             <button class="btn-close" onclick="closeModal('resolveTicketModal')">&times;</button>
         </div>
-        <div id="ticketDetailContent" style="background: var(--surface2); padding: 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.5rem;">
+        <div id="ticketDetailContent"
+            style="background: var(--surface2); padding: 1rem; border-radius: 8px; font-size: 0.9rem; margin-bottom: 1.5rem;">
             <!-- Dynamic Content -->
         </div>
         <div class="form-group">

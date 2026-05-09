@@ -1,9 +1,3 @@
-"""
-Entry point — run the Flask development server.
-
-Usage:
-    python run.py
-"""
 
 from app import create_app
 

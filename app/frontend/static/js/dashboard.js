@@ -851,6 +851,25 @@ function toggleFloatingChat() {
     }
 }
 
+// PowerBI Analytics
+function switchAnalyticsDashboard(type, btn) {
+    const frame = document.getElementById('powerbi-frame');
+    const buttons = document.querySelectorAll('.analytics-btn');
+    
+    buttons.forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // URLs for the dashboards
+    const urls = {
+        'sales': 'https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0',
+        'inventory': 'https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0&inventory=true' 
+    };
+
+    if (urls[type]) {
+        frame.src = urls[type];
+    }
+}
+
 async function sendAdminChatMessage() {
     const input = document.getElementById('adminChatInput');
     const container = document.getElementById('adminChatMessages');

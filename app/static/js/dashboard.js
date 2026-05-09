@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboardStats();
     loadNotifications();
     setInterval(loadNotifications, 30000);
-    
+
     // Close notifications if clicking outside
     document.addEventListener('click', () => {
         const dropdown = document.getElementById('notifDropdown');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Navigation
 function switchTab(tabId) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
+
     // Find and highlight active nav item
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
@@ -41,6 +41,25 @@ function switchTab(tabId) {
     if (tabId === 'bills') loadBills();
     if (tabId === 'payments') loadPayments();
     if (tabId === 'customers') loadCustomersView();
+}
+
+// PowerBI Analytics
+function switchAnalyticsDashboard(type, btn) {
+    const frame = document.getElementById('powerbi-frame');
+    const buttons = document.querySelectorAll('.analytics-btn');
+    
+    buttons.forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    // URLs for the dashboards
+    const urls = {
+        'sales': 'https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0',
+        'inventory': 'https://app.powerbi.com/reportEmbed?reportId=87a32e5d-18c9-4ace-90af-cab030508bde&autoAuth=true&ctid=ce84b0ca-61a1-4de1-aafd-4b5e1deb86e0&inventory=true' 
+    };
+
+    if (urls[type]) {
+        frame.src = urls[type];
+    }
 }
 
 // Stats & Charts
@@ -70,7 +89,7 @@ function renderPieChart(data) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (pieChartInstance) pieChartInstance.destroy();
-    
+
     const labels = data.map(d => d.category);
     const values = data.map(d => d.sales);
     const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
@@ -78,11 +97,11 @@ function renderPieChart(data) {
     pieChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20, font: { family: 'Inter' } } } 
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20, font: { family: 'Inter' } } }
             },
             cutout: '70%'
         }
@@ -137,7 +156,7 @@ function renderLowStockTable(list) {
             <td><strong>${p.name}</strong></td>
             <td><span class="text-danger">${p.stock} pcs</span></td>
             <td>${p.threshold} pcs</td>
-            <td><span class="badge ${p.status==='Critical'?'badge-danger':'badge-warning'}">${p.status}</span></td>
+            <td><span class="badge ${p.status === 'Critical' ? 'badge-danger' : 'badge-warning'}">${p.status}</span></td>
         </tr>
     `).join('');
 }
@@ -150,9 +169,9 @@ function renderAlertList(alerts) {
         return;
     }
     container.innerHTML = alerts.map(a => `
-        <div class="alert-item ${a.title.includes('Low')?'danger':'warning'}">
+        <div class="alert-item ${a.title.includes('Low') ? 'danger' : 'warning'}">
             <div class="alert-item-icon">
-                <i class="fas ${a.title.includes('Low')?'fa-exclamation-circle':'fa-info-circle'}"></i>
+                <i class="fas ${a.title.includes('Low') ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
             </div>
             <div class="alert-item-content">
                 <h4>${a.title}</h4>
@@ -168,8 +187,8 @@ function formatRelativeTime(isoString) {
     const now = new Date();
     const diff = (now - date) / 1000;
     if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return date.toLocaleDateString();
 }
 
@@ -184,10 +203,10 @@ function toggleNotifications(e) {
 async function loadNotifications() {
     const data = await api('/api/notifications/all', 'GET', null, true);
     if (!data) return;
-    
+
     const list = document.getElementById('notifList');
     const badge = document.getElementById('notifBadge');
-    
+
     const unreadCount = data.notifications.filter(n => !n.is_read).length;
     if (unreadCount > 0) {
         badge.innerText = unreadCount;
@@ -219,10 +238,10 @@ async function loadNotifications() {
 async function handleNotifClick(notif, e) {
     if (e) e.stopPropagation();
     if (!notif.is_read) await api(`/api/notifications/mark-read/${notif.id}`, 'POST');
-    
+
     if (notif.title === 'New Registration') switchTab('customers');
     else if (notif.title === 'Low Stock Alert') switchTab('inventory');
-    
+
     document.getElementById('notifDropdown').classList.remove('active');
     loadNotifications();
 }
@@ -252,11 +271,11 @@ function renderProducts() {
     if (!grid) return;
     grid.innerHTML = '';
     const filtered = currentCategory ? allProducts.filter(p => p.category === currentCategory) : allProducts;
-    
+
     filtered.forEach(p => {
         const imgUrl = p.image_url || 'https://via.placeholder.com/250x150?text=No+Image';
         let actionBtn = `<button class="btn btn-sm btn-primary" style="flex:1;" onclick="editProduct(${p.id})">Edit</button>`;
-        
+
         if (cartSession) {
             actionBtn = `<button class="btn btn-sm btn-success" style="flex:1;" onclick="addToCart(${p.id})">Add to Cart</button>`;
         }
@@ -334,7 +353,7 @@ async function saveProduct(e) {
 
     const method = id ? 'PUT' : 'POST';
     const url = id ? `/api/inventory/products/${id}` : `/api/inventory/products`;
-    
+
     const res = await api(url, method, payload);
     if (res) {
         showToast(`Product ${id ? 'updated' : 'added'}!`);
@@ -393,7 +412,7 @@ function initBillSession() {
     closeModal('startBillModal');
     document.getElementById('cartOverlay').classList.add('active');
     document.querySelector('.main-content').classList.add('cart-active');
-    
+
     switchTab('inventory');
     renderProducts();
     updateCartUI();
@@ -409,7 +428,7 @@ function cancelBill() {
 function addToCart(productId) {
     const p = allProducts.find(x => x.id === productId);
     if (p.stock <= 0) return showToast('Out of stock!', 'error');
-    
+
     const existing = cartSession.items.find(i => i.product.id === productId);
     if (existing) {
         if (existing.qty >= p.stock) return showToast('Max stock reached', 'error');
@@ -436,11 +455,11 @@ function updateCartUI() {
     if (!cartSession) return;
     document.getElementById('cartTypeBadge').innerText = cartSession.type.toUpperCase();
     document.getElementById('cartCustomerInfo').innerText = cartSession.type === 'instant' ? `Customer: ${cartSession.customerName}` : 'Credit Account Billing';
-    
+
     const list = document.getElementById('cartItemsList');
     list.innerHTML = '';
     let total = 0;
-    
+
     cartSession.items.forEach((item, idx) => {
         const sub = item.qty * item.product.price;
         total += sub;
@@ -471,7 +490,7 @@ function proceedToCheckout() {
     const paymentGroup = document.getElementById('paymentModeGroup');
     const qrContainer = document.getElementById('qrCodeContainer');
     const confirmBtn = document.querySelector('#checkoutModal .btn-success');
-    
+
     if (cartSession.type === 'credit') {
         paymentGroup.style.display = 'none';
         qrContainer.style.display = 'none';
@@ -525,10 +544,10 @@ async function loadBills() {
         <tr>
             <td>#${b.id}</td>
             <td>${new Date(b.created_at).toLocaleDateString()}</td>
-            <td><span class="badge ${b.bill_type==='credit'?'badge-warning':'badge-success'}">${b.bill_type.toUpperCase()}</span></td>
-            <td>${b.customer_name || 'Reg. Customer ' + (b.customer_id||'')}</td>
+            <td><span class="badge ${b.bill_type === 'credit' ? 'badge-warning' : 'badge-success'}">${b.bill_type.toUpperCase()}</span></td>
+            <td>${b.customer_name || 'Reg. Customer ' + (b.customer_id || '')}</td>
             <td>₹${b.final_amount.toFixed(2)}</td>
-            <td><span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span></td>
+            <td><span class="badge ${b.status === 'paid' ? 'badge-success' : 'badge-danger'}">${b.status.toUpperCase()}</span></td>
             <td><button class="btn btn-sm btn-primary" onclick="viewBill(${b.id})">View</button></td>
         </tr>
     `).join('');
@@ -542,8 +561,8 @@ async function viewBill(id) {
     document.getElementById('receiptDetails').innerHTML = `
         <strong>Date:</strong> ${new Date(b.created_at).toLocaleString()}<br>
         <strong>Customer:</strong> ${b.customer_name || (b.customer_id ? 'ID: ' + b.customer_id : 'Instant Walk-in')}<br>
-        <strong>Type:</strong> <span class="badge ${b.bill_type==='credit'?'badge-warning':'badge-success'}">${b.bill_type.toUpperCase()}</span> 
-        <strong>Status:</strong> <span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span>
+        <strong>Type:</strong> <span class="badge ${b.bill_type === 'credit' ? 'badge-warning' : 'badge-success'}">${b.bill_type.toUpperCase()}</span> 
+        <strong>Status:</strong> <span class="badge ${b.status === 'paid' ? 'badge-success' : 'badge-danger'}">${b.status.toUpperCase()}</span>
     `;
     const tbody = document.getElementById('receiptItems');
     tbody.innerHTML = b.items.map(i => `
@@ -672,7 +691,7 @@ async function viewCustomer(id) {
             <tr>
                 <td>${new Date(b.created_at).toLocaleDateString()}</td>
                 <td>₹${b.final_amount.toFixed(2)}</td>
-                <td><span class="badge ${b.status==='paid'?'badge-success':'badge-danger'}">${b.status.toUpperCase()}</span></td>
+                <td><span class="badge ${b.status === 'paid' ? 'badge-success' : 'badge-danger'}">${b.status.toUpperCase()}</span></td>
             </tr>`).join('');
     }
     const paymentsData = await api(`/api/payments/customer/${id}`);
