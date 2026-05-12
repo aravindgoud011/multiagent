@@ -36,5 +36,5 @@ class AzureMLService:
             print(f"Local ML redirection error: {e}")
             return None
 
-# Singleton instance
+
 azure_ml_service = AzureMLService()
