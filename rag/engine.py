@@ -76,5 +76,5 @@ class RAGEngine:
 
         return unique_results[:k]
 
-# Singleton
+
 rag_engine = RAGEngine()

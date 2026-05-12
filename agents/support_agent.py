@@ -184,5 +184,4 @@ class SupportAgent:
         ]
         return random.choice(fallbacks)
 
-# Singleton instance
 support_agent = SupportAgent()
